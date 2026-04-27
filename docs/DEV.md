@@ -252,12 +252,13 @@ Beispielfelder:
 | Attribut | Erklärung | Erlaubter Input | 
 | ---- | ---- | ----| 
 | category | | `field` oder `list` |
-| id | | |
-| name | | |
-| worktable | | |
-| subtable | | |
-| fixed | | |
-| datatype | | |
+| id | Das ist der technische Name, den du später in deinem PHP-Code verwendest, um auf den Wert zuzugreifen. Er darf keine Leerzeichen enthalten | |
+| name | Der Anzeigename im Designer. Auch hier nutzt man meist eine Übersetzungskonstante (z.B. `CONST_...`) | |
+| desc | Die Beschreibung. Dieser Text erscheint oft als Tooltip oder Hilfetext im Designer, um dem Admin zu erklären, was er hier eintragen muss. | |
+| worktable | Wenn yes, kann der Benutzer ein Feld aus der Hauptprozesstabelle wählen | |
+| subtable | Wenn yes, kann der Benutzer ein Feld aus einer Untertabelle wählen | |
+| fixed | Wenn yes, kann der Benutzer einen festen Text direkt in das Konfigurationsfeld schreiben | |
+| datatype | Legt fest, welcher Datentyp erwartet wird | `varchar` für Text, `integer` für Zahlen oder `date` für Daten |
 | requiered | | |
 | texttype | | |
 | texttype | | |
