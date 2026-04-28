@@ -130,7 +130,7 @@ define('COSTCENTERTABLE', 'Cost Center Table');
 define('COUNTERSUMMARY', 'Counter Summary');
 define('AUDITTRAIL', 'Audit Trail');
 define('AUDITTRAILCSV', 'Audit Trail CSV');
-define('INVOICE_STATUS', 'Invoice Status (comma separated)');
+define('INVOICE_STATUS', 'Document Status (comma separated)');
 define('SYNONYMS', 'Synonyms');
 define('DOCUMENTCLASSIFIER', 'Document Classifier');
 define('DOCUMENTCLASSIFIER_DESC', 'This system activity can be used to upload a document for classification via the Pedant Document Classifier API.');
