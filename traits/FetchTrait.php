@@ -80,14 +80,14 @@ trait FetchTrait
   protected function fetchInvoices(): void
     {
     try {
-      $invoice_status = $this->resolveInputParameter('invoice_status');
-      if (empty($invoice_status)) {
-        $invoice_status = 'reviewed';
+      $document_status = $this->resolveInputParameter('document_status');
+      if (empty($document_status)) {
+        $document_status = 'reviewed';
         }
 
       $statusValues = [];
-      if (!empty($invoice_status)) {
-        $parts = array_map('trim', explode(',', $invoice_status));
+      if (!empty($document_status)) {
+        $parts = array_map('trim', explode(',', $document_status));
         $parts = array_values(array_filter($parts, static fn($status) => $status !== ''));
 
         foreach ($parts as $status) {
