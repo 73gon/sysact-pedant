@@ -108,7 +108,7 @@ trait FetchTrait
       $stepParts = array_values(array_filter($parts, static fn($status) => $status !== ''));
 
       foreach ($stepParts as $step){
-        $stepValues[] = $step;
+        $stepValues[] = int($step);
       }
 
       $this->logInfo('Fetching invoices', ['statuses' => $statusValues]);
