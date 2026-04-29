@@ -95,7 +95,7 @@
                     <field id='demo' name='DEMO' worktable='no' subtable='no' fixed='yes' datatype='int' required='no' texttype='checkbox'/>
                     <field id='fileid' name='FILEID' worktable='yes' subtable='no' fixed='yes' datatype='varchar' required='yes'/>
                     <field id="table_head" name="TABLEHEAD" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="yes"/>
-                    <field id="stepID" name="STEPID" worktable="yes" subtable="no" fixed="yes" datatype="int" required="yes"/>
+                    <field id="stepID" name="STEPID" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="yes"/>
                     <field id="interval" name="INTERVAL" description="INTERVAL_DESC" worktable="yes" subtable="no" fixed="yes" datatype="int" required="yes"/>
                     <field id="worktime" name="WORKTIME" description="WORKTIME_DESC" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="yes"/>
                     <field id="weekend" name="WEEKEND" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="yes" texttype="checkbox"/>
