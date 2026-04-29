@@ -142,6 +142,8 @@ trait FetchTrait
         throw new JobRouterException("Invalid Path Input on Inputparameter 'path_flag': " . $path_flag);
       }
 
+      $this->logDebug('Following Urls were chosen', 'Urls' => $paths);
+
       foreach ($paths as $baseUrl) {
         $allIds = [];
         $pageCount = 1;
