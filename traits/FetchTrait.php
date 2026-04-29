@@ -81,23 +81,35 @@ trait FetchTrait
     {
     try {
       $document_status = $this->resolveInputParameter('document_status');
+      $path_flag = $this->resolveInputParameter('path_flag');
+      $stepIDs = $this->resolveInputParameter('stepID');
+
       if (empty($document_status)) {
         $document_status = 'reviewed';
         }
+      if(empty($path_flag)) {
+        $path_flag = 'both';
+      }
 
       $statusValues = [];
-      if (!empty($document_status)) {
-        $parts = array_map('trim', explode(',', $document_status));
-        $parts = array_values(array_filter($parts, static fn($status) => $status !== ''));
+      $flagParts = array_map('trim', explode(',', $document_status));
+      $flagParts = array_values(array_filter($parts, static fn($status) => $status !== ''));
 
-        foreach ($parts as $status) {
-          if (!in_array($status, self::$VALID_INVOICE_STATUSES, true)) {
-            $this->logError('Invalid invoice status', null, ['status' => $status]);
-            throw new JobRouterException('Invalid invoice status: ' . $status);
-            }
-          $statusValues[] = $status;
+      foreach ($flagParts as $status) {
+        if (!in_array($status, self::$VALID_INVOICE_STATUSES, true)) {
+          $this->logError('Invalid invoice status', null, ['status' => $status]);
+          throw new JobRouterException('Invalid invoice status: ' . $status);
           }
+        $statusValues[] = $status;
         }
+      
+      $stepValues=[];
+      $stepParts = array_map('trim', explode(',', $stepIDs));
+      $stepParts = array_values(array_filter($parts, static fn($status) => $status !== ''));
+
+      foreach ($stepParts as $step){
+        $stepValues[] = $step;
+      }
 
       $this->logInfo('Fetching invoices', ['statuses' => $statusValues]);
 
@@ -110,11 +122,27 @@ trait FetchTrait
         $statusQuery = '?' . implode('&', $queryParts);
         }
 
+      
       $baseURL = $this->getBaseUrl();
       $url_invoice = "$baseURL/v1/external/documents/invoices/to-export" . $statusQuery;
       $url_einvoice = "$baseURL/v1/external/documents/e-invoices/to-export" . $statusQuery;
+      $url_deliveryNote = "$baseURL/v1/external/documents/delivery-notes/to-export" . $statusQuery;
 
-      foreach ([$url_invoice, $url_einvoice] as $baseUrl) {
+      $paths = [];
+      if($path_flag === 'pedant'){
+        $paths[] = $url_invoice;
+        $paths[] = $url_einvoice;
+      } elseif($path_flag === 'deliveryNote') {
+        $paths[] = $url_deliveryNote;
+      } elseif ($path_flag === 'both'){
+        $paths[] = $url_invoice;
+        $paths[] = $url_einvoice;
+        $paths[] = $url_deliveryNote;
+      } else {
+        throw new JobRouterException("Invalid Path Input on Inputparameter 'path_flag': " . $path_flag);
+      }
+
+      foreach ($paths as $baseUrl) {
         $allIds = [];
         $pageCount = 1;
         $currentPage = 1;
@@ -127,19 +155,19 @@ trait FetchTrait
           $responseData = $this->makeApiRequest($url, 'GET');
           $response = $responseData['response'];
           } catch (JobRouterException $e) {
-          $this->logWarning('Fetch invoices request failed, skipping URL', ['url' => $url, 'error' => $e->getMessage()]);
+          $this->logWarning('Fetch documents request failed, skipping URL', ['url' => $url, 'error' => $e->getMessage()]);
           continue;
           }
 
         $data = json_decode($response, TRUE);
 
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
-          $this->logWarning('Failed to parse fetch invoices response', ['json_error' => json_last_error_msg(), 'url' => $url]);
+          $this->logWarning('Failed to parse fetch documents response', ['json_error' => json_last_error_msg(), 'url' => $url]);
           continue;
           }
 
         if (!isset($data['data']) || !is_array($data['data'])) {
-          $this->logWarning('Invalid fetch invoices response structure', ['url' => $url]);
+          $this->logWarning('Invalid fetch documents response structure', ['url' => $url]);
           continue;
           }
 
@@ -180,7 +208,7 @@ trait FetchTrait
 
         // Process all collected IDs
         $table_head = $this->resolveInputParameter('table_head');
-        $stepID = $this->resolveInputParameter('stepID');
+        
         $fileid = $this->resolveInputParameter('fileid'); //We need the name of the Tablefield, not the value of that tablefield
 
         $currentTime = new DateTime();
@@ -193,38 +221,40 @@ trait FetchTrait
 
         foreach ($allIds as $id) {
           try {
-            $dbType = $this->getDatabaseType();
-            if ($dbType === "MySQL") {
-              $query = "
-                        UPDATE JRINCIDENTS j
-                        JOIN $table_head t ON t.step_id = j.process_step_id
-                        SET j.resubmission_date = '$formattedTime'
-                        WHERE t.step = $stepID AND t.$fileid = '$id';
-                        ";
-              } elseif ($dbType === "MSSQL") {
-              $query = "
-                        UPDATE j
-                        SET j.resubmission_date = '$formattedTime'
-                        FROM JRINCIDENTS AS j
-                        JOIN $table_head AS t ON t.step_id = j.process_step_id
-                        WHERE t.step = $stepID AND t.$fileid = '$id';
-                        ";
-              } else {
-              $this->logError('Unsupported database type', null, ['dbType' => $dbType]);
-              throw new JobRouterException("Unsupported database type: " . $dbType);
+            foreach($stepValues as $step_id){
+              $dbType = $this->getDatabaseType();
+              if ($dbType === "MySQL") {
+                $query = "
+                          UPDATE JRINCIDENTS j
+                          JOIN $table_head t ON t.step_id = j.process_step_id
+                          SET j.resubmission_date = '$formattedTime'
+                          WHERE t.step = $stepID AND t.$fileid = '$id';
+                          ";
+                } elseif ($dbType === "MSSQL") {
+                $query = "
+                          UPDATE j
+                          SET j.resubmission_date = '$formattedTime'
+                          FROM JRINCIDENTS AS j
+                          JOIN $table_head AS t ON t.step_id = j.process_step_id
+                          WHERE t.step = $stepID AND t.$fileid = '$id';
+                          ";
+                } else {
+                $this->logError('Unsupported database type', null, ['dbType' => $dbType]);
+                throw new JobRouterException("Unsupported database type: " . $dbType);
+                }
+
+              $this->logDebug('Executing resubmission update query', ['id' => $id, 'query' => $query]);
+
+              $jobDB = $this->getJobDB();
+              $jobDB->exec($query);
+
+              $this->logDebug('Resubmission updated for invoice', ['id' => $id]);
               }
-
-            $this->logDebug('Executing resubmission update query', ['id' => $id, 'query' => $query]);
-
-            $jobDB = $this->getJobDB();
-            $jobDB->exec($query);
-
-            $this->logDebug('Resubmission updated for invoice', ['id' => $id]);
-            } catch (Exception $e) {
+          } catch (Exception $e) {
             $this->logWarning('Failed to update resubmission date for invoice', ['id' => $id, 'error' => $e->getMessage()]);
-            }
           }
         }
+      }
 
       $this->logInfo('fetchInvoices completed');
       } catch (JobRouterException $e) {
