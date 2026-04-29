@@ -93,7 +93,7 @@ trait FetchTrait
 
       $statusValues = [];
       $flagParts = array_map('trim', explode(',', $document_status));
-      $flagParts = array_values(array_filter($parts, static fn($status) => $status !== ''));
+      $flagParts = array_values(array_filter($flagParts, static fn($status) => $status !== ''));
 
       foreach ($flagParts as $status) {
         if (!in_array($status, self::$VALID_INVOICE_STATUSES, true)) {
@@ -142,7 +142,7 @@ trait FetchTrait
         throw new JobRouterException("Invalid Path Input on Inputparameter 'path_flag': " . $path_flag);
       }
 
-      $this->logDebug('Following Urls were chosen', 'Urls' => $paths);
+      $this->logDebug('Following Urls were chosen', ['Urls' => $paths]);
 
       foreach ($paths as $baseUrl) {
         $allIds = [];
