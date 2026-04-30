@@ -216,12 +216,11 @@ trait ImportTrait
 
       $table = $this->resolveInputParameter($tableParam) ?? null;
       $listfields = $this->resolveInputParameterListValues($listParam) ?? null;
-      $externalDatabase = $this->resolveInputParameter('external_connection') == '1';
+      $externalConnection = $this->resolveInputParameter('external_connection') == '1';
 
       $this->logDebug("Resolving input Parameter", [
         'table' => $table,
         'listfields' => $listfields,
-        'externalDatabase' => $externalDatabase,
         'externalConnection' => $externalConnection,
       ]);
       
@@ -237,7 +236,7 @@ trait ImportTrait
         return;
         }
       // Build SELECT query from field mapping
-      if(!$externalDatabase){
+      if(!$externalConnection){
         $this->logInfo("Connectiong to internal Database");
         $DB = $this->getJobDB();
       } else {
