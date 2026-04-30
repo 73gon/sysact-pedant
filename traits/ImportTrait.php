@@ -216,8 +216,7 @@ trait ImportTrait
 
       $table = $this->resolveInputParameter($tableParam) ?? null;
       $listfields = $this->resolveInputParameterListValues($listParam) ?? null;
-      $externalDatabase = $this->resolveInputParameter('external_database') == '1';
-      $externalConnection = $this->resolveInputParameter('external_connection');
+      $externalDatabase = $this->resolveInputParameter('external_connection') == '1';
 
       $this->logDebug("Resolving input Parameter", [
         'table' => $table,
@@ -242,8 +241,13 @@ trait ImportTrait
         $this->logInfo("Connectiong to internal Database");
         $DB = $this->getJobDB();
       } else {
-        $this->logInfo("Connectiong to external Database");
-        $DB = $this->getDBConnection($externalConnection);
+        $path = __DIR__ . '/../dbCredentials.php';
+        if (file_exists($path)) {
+            $this->logInfo("Connecting to external Database");
+            require_once($path);
+        } else {
+            throw new JobRouterException("Database credentials file missing at $path");
+        }
       }
   
       $lastKey = null;
