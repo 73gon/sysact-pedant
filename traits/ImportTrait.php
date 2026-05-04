@@ -247,6 +247,7 @@ trait ImportTrait
             require_once($path);
             if (!isset($DB) || !$DB instanceof PDO) {
               throw new JobRouterException("Variable \$DB was not correctly defined in $path.");
+            }
           } catch (Exception $e){
             throw new JobRouterException("Failed to load external Database: " . $e->getMessage());
           }
