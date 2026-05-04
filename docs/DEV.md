@@ -31,7 +31,7 @@ Inhaltsverzeichnis
     - [Aufgaben der Datei config.php (Systemkonfiguration)](#aufgaben-der-datei-configphp-systemkonfiguration)
     - [Logging](#logging)
   - [Vorstellung von Datei: dbCredentials.php](#vorstellung-von-datei-dbcredentialsphp)
-    - [Aufgaben der Datei dbCredentials.php (Systemkonfiguration)](#aufgaben-der-datei-dbcredentialsphp-systemkonfiguration)
+    - [Benötigte Werte in der dbCredentials.php (Systemkonfiguration)](#benötigte-werte-in-der-dbcredentialsphp-systemkonfiguration)
 - [Einrichtung der Systemaktivität](#einrichtung-der-systemaktivität)
   - [Grundlegende systematische Verknüpfungen:](#grundlegende-systematische-verknüpfungen)
   - [Beispiel anhand der Funktion: Rechnung auslesen (pedant)](#beispiel-anhand-der-funktion-rechnung-auslesen-pedant)
@@ -251,19 +251,19 @@ Beispielfelder:
 
  <list id="importVendor" name="IMPORTVENDOR" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="no" udl="yes"/>
 ```
-| Attribut | Erklärung | Erlaubter Input | 
-| ---- | ---- | ----| 
-| category | | `field` oder `list` |
-| id | Das ist der technische Name, den du später in deinem PHP-Code verwendest, um auf den Wert zuzugreifen. Er darf keine Leerzeichen enthalten | |
-| name | Der Anzeigename im Designer. Auch hier nutzt man meist eine Übersetzungskonstante (z.B. `CONST_...`) | |
-| desc | Die Beschreibung. Dieser Text erscheint oft als Tooltip oder Hilfetext im Designer, um dem Admin zu erklären, was er hier eintragen muss. | |
-| worktable | Wenn yes, kann der Benutzer ein Feld aus der Hauptprozesstabelle wählen | |
-| subtable | Wenn yes, kann der Benutzer ein Feld aus einer Untertabelle wählen | |
-| fixed | Wenn yes, kann der Benutzer einen festen Text direkt in das Konfigurationsfeld schreiben | |
-| datatype | Legt fest, welcher Datentyp erwartet wird | `varchar` für Text, `integer` für Zahlen oder `date` für Daten |
-| requiered | | |
-| texttype | | |
-| texttype | | |
+| Attribut  | Erklärung                                                                                                                                  | Erlaubter Input                                                |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| category  |                                                                                                                                            | `field` oder `list`                                            |
+| id        | Das ist der technische Name, den du später in deinem PHP-Code verwendest, um auf den Wert zuzugreifen. Er darf keine Leerzeichen enthalten |                                                                |
+| name      | Der Anzeigename im Designer. Auch hier nutzt man meist eine Übersetzungskonstante (z.B. `CONST_...`)                                       |                                                                |
+| desc      | Die Beschreibung. Dieser Text erscheint oft als Tooltip oder Hilfetext im Designer, um dem Admin zu erklären, was er hier eintragen muss.  |                                                                |
+| worktable | Wenn yes, kann der Benutzer ein Feld aus der Hauptprozesstabelle wählen                                                                    |                                                                |
+| subtable  | Wenn yes, kann der Benutzer ein Feld aus einer Untertabelle wählen                                                                         |                                                                |
+| fixed     | Wenn yes, kann der Benutzer einen festen Text direkt in das Konfigurationsfeld schreiben                                                   |                                                                |
+| datatype  | Legt fest, welcher Datentyp erwartet wird                                                                                                  | `varchar` für Text, `integer` für Zahlen oder `date` für Daten |
+| requiered |                                                                                                                                            |                                                                |
+| texttype  |                                                                                                                                            |                                                                |
+| texttype  |                                                                                                                                            |                                                                |
 
 
 
@@ -335,16 +335,48 @@ Details zu Support-Fällen findest du in der [SUPPORT.md-Datei](./SUPPORT.md)
 ## Vorstellung von Datei: dbCredentials.php
 
 Diese Datei dient als Speicherpunkt der Credentials für externe Datenbanken, welcher per PDO verbunden werden.
-Die Hauptaufgabe dieser Datei ist die Bereitstellung von Datenbankcredentials, wenn der Kunde nicht die JobRouter-Datenbank verwendet, sondern seine Informationen in einer anderen Datenbank hinterlegt hat.
+Die Hauptaufgabe dieser Datei ist die Bereitstellung von Datenbankcredentials, wenn der Kunde nicht die JobRouter-Datenbank verwendet, sondern seine Informationen in einer anderen Datenbank hinterlegt hat. Diese Informationen werden im importTrait aufgerufen und verarbeitet.
 
-### Aufgaben der Datei dbCredentials.php (Systemkonfiguration)
+### Benötigte Werte in der dbCredentials.php (Systemkonfiguration)
 
 - Zusammensetzung der wichtigsten Zugangsinformationen
 
 - Benötigte Werte: `host`[^host], `database`[^database], `user`[^user], `password`[^password], `servertyp`[^servertyp].
 
 
-Die Hauptaufgabe dieser Datei ist die Bereitstellung von globalen Steuerungsparametern des Debuggings. Sie dient vor allem dazu, das Verhalten der Log-Informationen zu beeinflussen, ohne den PHP-Code selbst ändern zu müssen.
+Damit die Verbindung funktioniert, wird die Variable $dsn im try-Block basierend auf diesen Werten automatisch zusammengesetzt. Es müssen, je nach Datenbank, nur die Variablen benannt werden.
+```
+$host     = "HOST";
+$database = "EXPORT_STAMMDATEN";
+$user     = "jr_admin";
+$password = "6zbnjkdsdfhj"; //fiktives Passwort
+$servertyp = "sqlsrv";
+
+try {
+    $dsn = "$servertyp:Server=$host;Database=$database";
+    
+    $DB = new PDO($dsn, $user, $password);
+
+    $DB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+}
+```
+
+Gleichzeitig muss in der php.ini die entsprechende Extension zur passenden Datenbank aktiviert werden.
+```
+- extension=pdo_mysql (für MySQL/MariaDB)
+
+- extension=pdo_sqlite (für SQLite)
+
+- extension=pdo_pgsql (für PostgreSQL)
+```
+|Präfix|Datenbank|Beispiel DSN|
+|---|---|---|
+|mssql | Microsoft SQL | $servertyp:Server=$host;Database=$database |
+|mysql | MySQL / MariaDB| $mysql:host=$host;dbname=$database |
+|pgsql |PostgreSQL | $servertyp:host=$host;port=5432;dbname=$database |
+|sqlite|SQLite (Datei) |sqlite:/pfad/zu/deiner/datenbank.sqlite |
+
 
 # Einrichtung der Systemaktivität
 
@@ -360,7 +392,7 @@ Diese Einstellungen werden mit dem Kunden besprochen und vom ihm entschieden.
 
 - **Datenbank- & Prozesstabellenverknüpfung**
 
-Diese Einstellungen hängen von der Prozesstruktur und benennung der Felder ab
+Diese Einstellungen hängen von der Prozesstruktur und benennung der Felder ab.
 
 
 ## Grundlegende systematische Verknüpfungen:
@@ -451,3 +483,13 @@ Für spezifische Informationen zu den Parametern sieh bitte in die [README.md](.
 [^error]: Protokolliert nur Ausnahmen und schwerwiegende Fehler. Minimale Ausgabe. Für den Einsatz in stabilen Produktionsumgebungen.
 
 [^debug]: Protokolliert ALLES: Abfragen, Variablen, Daten nach jeder Änderung, vollständige API-Anfrage- und Antworttexte. Die Protokolldateien wachsen schnell an (GB). Nur zur Fehlerbehebung bei bestimmten Problemen verwenden.
+
+[^host]: host: Die Adresse des Datenbankservers. Meistens ist dies localhost, wenn die Datenbank auf demselben Server wie das Skript läuft, oder eine spezifische IP-Adresse/Domain eines externen Datenbankservers.
+
+[^database]: database: Der spezifische Name der Datenbank innerhalb des Datenbank-Managementsystems, auf die zugegriffen werden soll und in der sich die Tabellen befinden.
+
+[^user]: user: Der Benutzername, der für die Authentifizierung am Datenbankserver verwendet wird. Dieser Benutzer muss über die entsprechenden Berechtigungen (z. B. SELECT, INSERT) für die Ziel-Datenbank verfügen.
+
+[^password]: password: Das zugehörige Passwort für den angegebenen Datenbank-Benutzer. Aus Sicherheitsgründen sollte dieses Feld niemals im Klartext in öffentlich zugänglichen Repositories landen.
+
+[^servertyp]: servertyp: Gibt das Treibersystem an (z. B. mysql, pgsql oder mssql), das für den Data Source Name (DSN) benötigt wird. PDO nutzt diesen Präfix, um zu wissen, wie es mit dem jeweiligen Server kommunizieren soll.
