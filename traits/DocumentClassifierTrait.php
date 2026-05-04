@@ -245,63 +245,55 @@ trait DocumentClassifierTrait
 
   protected function buildConfidenceField(array $dataValues): string{
 
-    $subtableName = $this->resolveInputParameter("subtableName");
+    $attributesConfidence = $this->resolveOutputParameterListAttributes("confidenceValues");
 
     $dataConfidence = $dataValues['documentClassifierDataBoxes'];
-    $values = [
-      'dateConfidence' => [
-        'confidence' => $dataConfidence['documentClassifierDate']['confidence'] ?? '',
-        'reasoning' => $dataConfidence['documentClassifierDate']['reasoning'] ?? '',
-      ],
-      'numberConfidence' => [
-        'confidence' => $dataConfidence['documentClassifierNumber']['confidence'] ?? '',
-        'reasoning' => $dataConfidence['documentClassifierNumber']['reasoning'] ?? '',
-      ],
-      'typeConfidence' => [
-        'confidence' => $dataConfidence['documentClassifierType']['confidence'] ?? '',
-        'reasoning' => $dataConfidence['documentClassifierType']['reasoning'] ?? '',
-      ],
-      'recipientCompanyConfidence' => [
-        'confidence' => $dataConfidence['recipientCompanyName']['confidence'] ?? '',
-        'reasoning' => $dataConfidence['recipientCompanyName']['reasoning'] ?? '',
-      ],
-      'recipientInfoConfidence' => [
-        'confidence' => $dataConfidence['recipientInfo']['confidence'] ?? '',
-        'reasoning' => $dataConfidence['recipientInfo']['reasoning'] ?? '',
-      ],
-      'recipientVatNumberConfidence' => [
-        'confidence' => $dataConfidence['recipientVatNumber']['confidence'] ?? '',
-        'reasoning' => $dataConfidence['recipientVatNumber']['reasoning'] ?? '',
-      ],
-      'vatNumberConfidence' => [
-        'confidence' => $dataConfidence['vatNumber']['confidence'] ?? '',
-        'reasoning' => $dataConfidence['vatNumber']['reasoning'] ?? '',
-      ],
-      'vendorCompanyNameConfidence' => [
-        'confidence' => $dataConfidence['vendorCompanyName']['confidence'] ?? '',
-        'reasoning' => $dataConfidence['vendorCompanyName']['reasoning'] ?? '',
-      ],
-      'vendorInfoConfidence' => [
-        'confidence' => $dataConfidence['vendorInfo']['confidence'] ?? '',
-        'reasoning' => $dataConfidence['vendorInfo']['reasoning'] ?? '',
-      ],
+
+    $confidenceMapping = [
+        'dateConfidence'               => $dataConfidence['documentClassifierDate'] ?? [],
+        'numberConfidence'             => $dataConfidence['documentClassifierNumber'] ?? [],
+        'typeConfidence'               => $dataConfidence['documentClassifierType'] ?? [],
+        'recipientCompanyConfidence'   => $dataConfidence['recipientCompanyName'] ?? [],
+        'recipientInfoConfidence'      => $dataConfidence['recipientInfo'] ?? [],
+        'recipientVatNumberConfidence' => $dataConfidence['recipientVatNumber'] ?? [],
+        'vatNumberConfidence'          => $dataConfidence['vatNumber'] ?? [],
+        'vendorCompanyNameConfidence'  => $dataConfidence['vendorCompanyName'] ?? [],
+        'vendorInfoConfidence'         => $dataConfidence['vendorInfo'] ?? [],
     ];
-    $rowID = 1;
-    foreach($values as $name => $value){
-      $this->setSubtableValue($subtableName, $rowID, "NAME", $name;
-      $this->setSubtableValue($subtableName, $rowID, "VALUE", $value["confidence"];
-      $this->setSubtableValue($subtableName, $rowID, "REASON", $value["reasoning"];
-      $rowID++;
+
+    $valuesTable = [];
+    $indexCount = 0;
+
+    foreach ($confidenceMapping as $name => $data) {
+        $valuesTable['name'][]       = $name;
+        $valuesTable['confidence'][] = $data['confidence'] ?? '';
+        $valuesTable['reasoning'][]  = $data['reasoning'] ?? '';
+        $indexCount++;
     }
 
-    $this->logDebug('Confidence values fetched', [
-      'function' => 'buildConfidenceField',
-      'values' => $string,
-      ]
-    );
-    return implode( ', ', $string);
-  }  
-  
+    $this->logDebug('Confidence details', ['rowCount' => $indexCount]);
+
+    for ($i = 0; $i < $indexCount; $i++) {
+      try {
+          $rowID = $this->getSubtableCount($attributesConfidence[0]['subtable']) + 1;
+
+          foreach ($attributesConfidence as $attribute) {
+              $value = isset($valuesTable[$attribute['id']][$i]) ? $valuesTable[$attribute['id']][$i] : '';
+              $this->setSubtableValue(
+                  $attribute['subtable'], 
+                  $rowID + $i, 
+                  $attribute['value'], 
+                  $value
+              );
+          }
+      } catch (Exception $e) {
+          $this->logWarning('Failed to set confidence subtable value', [
+              'index' => $i, 
+              'error' => $e->getMessage()
+          ]);
+      }
+    } 
+  }
 }
 
 
