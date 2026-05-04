@@ -214,8 +214,8 @@ trait ImportTrait
     try {
       $this->logInfo("Starting $entityType import");
 
-      $table = $this->resolveInputParameter($tableParam) ?? null;
-      $listfields = $this->resolveInputParameterListValues($listParam) ?? null;
+      $table = $this->resolveInputParameter($tableParam) ?? [];
+      $listfields = $this->resolveInputParameterListValues($listParam) ?? [];
       $externalConnection = $this->resolveInputParameter('external_connection') == '1';
 
       $this->logDebug("Resolving input Parameter", [
