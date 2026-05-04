@@ -12,6 +12,6 @@ try {
     $DB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 } catch (PDOException $e) {
-    die("Failed to connect: " . $e->getMessage());
+    throw new JobRouterException("Failed to connect: " . $e->getMessage());
 }
 ?>

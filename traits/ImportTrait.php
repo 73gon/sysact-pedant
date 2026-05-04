@@ -242,8 +242,14 @@ trait ImportTrait
       } else {
         $path = __DIR__ . '/../dbCredentials.php';
         if (file_exists($path)) {
+          try{
             $this->logInfo("Connecting to external Database");
             require_once($path);
+            if (!isset($DB) || !$DB instanceof PDO) {
+              throw new JobRouterException("Variable \$DB was not correctly defined in $path.");
+          } catch (Exception $e){
+            throw new JobRouterException("Failed to load external Database: " . $e->getMessage());
+          }
         } else {
             throw new JobRouterException("Database credentials file missing at $path");
         }
