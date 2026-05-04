@@ -233,6 +233,14 @@ class pedantSystemActivity extends AbstractSystemActivityAPI
                 ['name' => DC_CONFIDENCES, 'value' => 'documentClassifierConfidence'],
             ];
             }
+        if ($elementID == 'confidenceValues') {
+            return [
+                ['name' => '-', 'value' => ''],
+                ['name' => NAME, 'value' => 'confidenceName'],
+                ['name' => VALUE, 'value' => 'confidenceValue'],
+                ['name' => REASON, 'value' => 'confidenceReason'],
+            ];
+            }
         $this->logDebug('getUDL() called', ['udl' => $udl, 'elementID' => $elementID]);
         return null;
         }
