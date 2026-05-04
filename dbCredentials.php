@@ -3,9 +3,10 @@ $host     = "";
 $database = "";
 $user     = "";
 $password = "";
+$servertyp = "";
 
 try {
-    $dsn = "";
+    $dsn = "$servertyp:Server=$host;Database=$database";
     
     $DB = new PDO($dsn, $user, $password);
 
