@@ -242,7 +242,7 @@ trait ImportTrait
       } else {
         $path = __DIR__ . '/../dbCredentials.php';
         if (file_exists($path)) {
-          try{
+          try {
             $this->logInfo("Connecting to external Database");
             require_once($path);
             if (!isset($DB) || !$DB instanceof PDO) {
@@ -276,23 +276,38 @@ trait ImportTrait
 
       $this->logDebug("$entityType import query", ['query' => $temp]);
 
-      $result = $DB->query($temp);
-      $payloads = [];
-
-      while ($row = $DB->fetchRow($result)) {
-        $data = [];
-        foreach ($fields as $index => $field) {
-          $value = isset($row[$fields[$index]]) ? $row[$fields[$index]] : '';
-
-          if ($rowTransformers && isset($rowTransformers[$field])) {
-            $data[$field] = $rowTransformers[$field]($value);
+      if(!$externalConnection){
+        $result = $DB->query($temp);
+        $payloads = [];
+        while ($row = $DB->fetchRow($result)) {
+          $data = [];
+          foreach ($fields as $index => $field) {
+            $value = isset($row[$fields[$index]]) ? $row[$fields[$index]] : '';
+            if ($rowTransformers && isset($rowTransformers[$field])) {
+              $data[$field] = $rowTransformers[$field]($value);
             } else {
-            $data[$field] = !empty($value) ? $value : '';
+              $data[$field] = !empty($value) ? $value : '';
             }
           }
         $payloads[] = $data;
         }
-
+      } else {
+        $stmt = $DB->query($temp);
+        $payloads = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+          $data = [];
+          foreach ($fields as $field) {
+              $value = $row[$field] ?? '';
+              if ($rowTransformers && isset($rowTransformers[$field])) {
+                $data[$field] = $rowTransformers[$field]($value);
+              } else {
+                $data[$field] = ($value !== '') ? $value : '';
+              }
+          }
+          $payloads[] = $data;
+        }
+      }
+      
       $this->logInfo("$entityType CSV generated", ['rowCount' => count($payloads)]);
       $this->logDebug("$entityType payloads", ['payloads' => $payloads]);
 
