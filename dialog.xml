@@ -89,6 +89,7 @@
                     <field id='dc_maxCounter' name='DC_MAXRETRIES' worktable='no' subtable='no' fixed='yes' datatype='int' required='yes'/>
                     <field id='dc_interval' name='DC_INTERVAL' worktable='yes' subtable='no' fixed='yes' datatype='int' required='yes'/>
                     <field id='maxFileSize' name='MAXFILESIZE' worktable='yes' subtable='no' fixed='yes' datatype='int' required='no'/>
+                    <field id='subtableName' name='SUBTABLENAME' worktable='yes' subtable='no' fixed='yes' datatype='varchar' required='no'/>
                 </inputParameters>
                 <outputParameters>
                     <field id='dc_documentId' name='DC_DOCUMENTID' worktable='yes' subtable='yes' fixed='no' datatype='varchar' required='no'/>
