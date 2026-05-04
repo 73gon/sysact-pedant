@@ -2,8 +2,6 @@
 
 Dies ist die Dokumentation der Systemaktivität: "Pedant"
 
-- _Version 2.3.0_
-
 Inhaltsverzeichnis
 
 - [Allgemein](#allgemein)

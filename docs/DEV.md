@@ -30,6 +30,8 @@ Inhaltsverzeichnis
     - [Welche Aufgabe erfüllt config.php?](#welche-aufgabe-erfüllt-configphp)
     - [Aufgaben der Datei config.php (Systemkonfiguration)](#aufgaben-der-datei-configphp-systemkonfiguration)
     - [Logging](#logging)
+  - [Vorstellung von Datei: dbCredentials.php](#vorstellung-von-datei-dbcredentialsphp)
+    - [Aufgaben der Datei dbCredentials.php (Systemkonfiguration)](#aufgaben-der-datei-dbcredentialsphp-systemkonfiguration)
 - [Einrichtung der Systemaktivität](#einrichtung-der-systemaktivität)
   - [Grundlegende systematische Verknüpfungen:](#grundlegende-systematische-verknüpfungen)
   - [Beispiel anhand der Funktion: Rechnung auslesen (pedant)](#beispiel-anhand-der-funktion-rechnung-auslesen-pedant)
@@ -329,6 +331,20 @@ Die Hauptaufgabe dieser Datei ist die Bereitstellung von globalen Steuerungspara
 - Für Supportfälle sollten nach Möglichkeit immer `INCIDENT`, `TEMPJSON` und `COUNTERSUMMARY` mitgeführt werden.
 
 Details zu Support-Fällen findest du in der [SUPPORT.md-Datei](./SUPPORT.md)
+
+## Vorstellung von Datei: dbCredentials.php
+
+Diese Datei dient als Speicherpunkt der Credentials für externe Datenbanken, welcher per PDO verbunden werden.
+Die Hauptaufgabe dieser Datei ist die Bereitstellung von Datenbankcredentials, wenn der Kunde nicht die JobRouter-Datenbank verwendet, sondern seine Informationen in einer anderen Datenbank hinterlegt hat.
+
+### Aufgaben der Datei dbCredentials.php (Systemkonfiguration)
+
+- Zusammensetzung der wichtigsten Zugangsinformationen
+
+- Benötigte Werte: `host`[^host], `database`[^database], `user`[^user], `password`[^password], `servertyp`[^servertyp].
+
+
+Die Hauptaufgabe dieser Datei ist die Bereitstellung von globalen Steuerungsparametern des Debuggings. Sie dient vor allem dazu, das Verhalten der Log-Informationen zu beeinflussen, ohne den PHP-Code selbst ändern zu müssen.
 
 # Einrichtung der Systemaktivität
 
