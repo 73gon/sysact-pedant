@@ -371,8 +371,11 @@ trait InvoiceTrait
       $type = match (true) {
           $isXml => 'xml',
           $isZugferd => 'zugferd',
-          default => 'default',
+          default => 'error',
       };
+      if($type === 'error'){
+        throw new JobRouterException("No Type defined: " . $type);
+      }
       $paths = [
           'pedant' => [
               'xml' => "/v2/external/documents/invoices/upload",
@@ -400,9 +403,11 @@ trait InvoiceTrait
       $urlType = match ($type) {
         'e_invoice' => "e-invoices",
         'invoice' => "invoices",
-        default => "deliveryNote", //BEISPIELWERT - WARTE AUF POSTMAN UM WERTE EINSEHEN ZU KÖNNEN
+        default => "error",
       };
-
+      if($type === 'error'){
+        throw new JobRouterException("No Type defined: " . $type);
+      }
       $paths = [
         'pedant' => [
           'basePath' => "/v1/external/documents/",
