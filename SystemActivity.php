@@ -32,6 +32,7 @@ class pedantSystemActivity extends AbstractSystemActivityAPI
     use FetchTrait;
     use DataMapperTrait;
     use DocumentClassifierTrait;
+    use DeliveryTrait;
 
     public function getActivityName()
         {
