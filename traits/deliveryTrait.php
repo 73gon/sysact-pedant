@@ -196,7 +196,7 @@ trait deliveryTrait
 
       $dataItem = $data['data'][0];
       $status = $dataItem['status'] ?? '';
-      $this->logInfo('Document classifier status received', ['status' => $status]);
+      $this->logInfo('Delivery Note status received', ['status' => $status]);
 
       if (in_array($status, self::FALSE_STATES)) {
         $this->logDebug('Document still processing', ['status' => $status]);
@@ -206,39 +206,38 @@ trait deliveryTrait
       $this->storeOutputParameter('invoiceID', $dataItem['documentId'] ?? '');
       $this->storeOutputParameter('tempJSON', json_encode($data, JSON_PRETTY_PRINT));
 
-      $attributes = $this->resolveOutputParameterListAttributes('classificationDetails');
+      $attributes = $this->resolveOutputParameterListAttributes('deliveryNoteDetails');
       $values = [
         // Values
-        'documentClassifierNumber' => $dataItem['documentClassifierNumber'] ?? '',
-        'documentType' => $dataItem['documentType'] ?? '',
-        'vendorCompanyName' => $dataItem['vendorCompanyName'] ?? '',
+        'orderDate' => $dataItem['orderDate'] ?? '',
+        'orderNumber' => $dataItem['orderNumber'] ?? '',
         'recipientCompanyName' => $dataItem['recipientCompanyName'] ?? '',
-        'issueDate' => !empty($dataItem['issueDate']) ? date('d.m.Y', strtotime($dataItem['issueDate'])) : '',
-        'documentClassifierConfidence' => $confidence ?? '',
+        'vendorCompanyName' => $dataItem['vendorCompanyName'] ?? '',
+        'vendorInfo' => $dataItem['vendorInfo'] ?? '',
       ];
 
-      $this->logDebug('Classification values', $values);
+      $this->logDebug('Delivery Note values', $values);
 
       foreach ($attributes as $attribute) {
         try {
           $this->setTableValue($attribute['value'], $values[$attribute['id']] ?? '');
           } catch (Exception $e) {
-          $this->logWarning('Failed to set classification detail table value', ['attribute' => $attribute['id'], 'error' => $e->getMessage()]);
+          $this->logWarning('Failed to set delivery note detail table value', ['attribute' => $attribute['id'], 'error' => $e->getMessage()]);
           }
         }
 
         if( $this->isCompleted() === false ){
           $this->markActivityAsCompleted();
-          $this->logInfo('Document classifier completed, activity marked as completed');
+          $this->logInfo('Delivery Note completed, activity marked as completed');
         } else {
-          $this->logInfo('Document classifier still running');
+          $this->logInfo('Delivery Note still running');
         }
       
       } catch (JobRouterException $e) {
       throw $e;
       } catch (Exception $e) {
-      $this->logError('Unexpected error in checkDocumentClassifier', $e);
-      throw new JobRouterException('Document classifier check error: ' . $e->getMessage());
+      $this->logError('Unexpected error in Delivery Note', $e);
+      throw new JobRouterException('Delivery Note check error: ' . $e->getMessage());
       }
     }
 }
