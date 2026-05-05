@@ -272,9 +272,9 @@ trait DocumentClassifierTrait
         'confidence' => $data['confidence'] ?? 'unknown',
         'reasoning' => $data['reasoning'] ?? 'unknown',
         ]);
-        $valuesTable['NAME'][]       = $name;
-        $valuesTable['confidence'][] = $data['confidence'] ?? '';
-        $valuesTable['REASON'][]  = $data['reasoning'] ?? '';
+        $valuesTable['confidenceName'][]       = $name;
+        $valuesTable['confidenceValue'][] = $data['confidence'] ?? 'none';
+        $valuesTable['confidenceReason'][]  = $data['reasoning'] ?? 'none';
         $indexCount++;
     }
 
@@ -283,7 +283,6 @@ trait DocumentClassifierTrait
     for ($i = 0; $i < $indexCount; $i++) {
       try {
           $rowID = $this->getSubtableCount($attributesConfidence[0]['subtable']) + 1;
-
           foreach ($attributesConfidence as $attribute) {
               $value = isset($valuesTable[$attribute['id']][$i]) ? $valuesTable[$attribute['id']][$i] : '';
               $this->setSubtableValue($attribute['subtable'], $rowID + $i, $attribute['value'], $value);
