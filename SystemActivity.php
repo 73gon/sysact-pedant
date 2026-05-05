@@ -237,21 +237,11 @@ class pedantSystemActivity extends AbstractSystemActivityAPI
         if ($elementID == 'deliveryNoteDetails') {
             return [
                 ['name' => '-', 'value' => ''],
-                ['name' => DN_RECIPIENTCITY, 'value' => 'recipientCity'],
+                ['name' => DN_ORDERDATE, 'value' => 'orderDate'],
+                ['name' => DN_ORDERNUMBER, 'value' => 'orderNumber'],
                 ['name' => DN_RECIPIENTCOMPANYNAME, 'value' => 'recipientCompanyName'],
-                ['name' => DN_RECIPIENTINFO, 'value' => 'recipientInfo'],
-                ['name' => DN_RECIPIENTSTREET, 'value' => 'recipientStreet'],
-                ['name' => DN_RECIPIENTVATNUMBER, 'value' => 'recipientVatNumber'],
-                ['name' => DN_RECIPIENTZIPCODE, 'value' => 'recipientZipCode'],
-
                 ['name' => DN_VENDORCOMPANYNAME, 'value' => 'vendorCompanyName'],
                 ['name' => DN_VENDORINFO, 'value' => 'vendorInfo'],
-                ['name' => DN_VENDORNAME, 'value' => 'vendorName'],
-                ['name' => DN_VENDORSTREET, 'value' => 'vendorStreet'],
-                ['name' => DN_VENDORZIPCODE, 'value' => 'vendorZipCode'],
-                ['name' => DN_VENDOREMAIL, 'value' => 'vendorEmail'],
-                ['name' => DN_VENDORCITY, 'value' => 'vendorCity'],
-                ['name' => DN_VENDORVATNUMBER, 'value' => 'vendorVatNumber'],
             ];
             }
         $this->logDebug('getUDL() called', ['udl' => $udl, 'elementID' => $elementID]);
