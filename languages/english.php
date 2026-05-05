@@ -149,4 +149,6 @@ define('DC_ISSUEDATE', 'Issue Date');
 define('ESRREFERENCENUMBER', 'ESR Reference Number');
 define('READDELIVERYNOTE', 'Retrieve the delivery note');
 define('READDELIVERYNOTE_DESC', 'This systemactivity can be used to upload a delivery note on pedant and check it on availability and correctness');
-define('DC_CONFIDENCES', 'Sicherheit');
+define('CONFIDENCENAME', 'Field Name');
+define('CONFIDENCEVALUE', 'Confidence Level');
+define('CONFIDENCEREASON', 'Reasoning');
