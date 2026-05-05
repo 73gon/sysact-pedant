@@ -9,6 +9,7 @@ require_once __DIR__ . '/traits/InvoiceTrait.php';
 require_once __DIR__ . '/traits/FetchTrait.php';
 require_once __DIR__ . '/traits/DataMapperTrait.php';
 require_once __DIR__ . '/traits/DocumentClassifierTrait.php';
+require_once __DIR__ . '/traits/DeliveryTrait.php';
 
 class pedantSystemActivity extends AbstractSystemActivityAPI
     {
@@ -231,26 +232,6 @@ class pedantSystemActivity extends AbstractSystemActivityAPI
                 ['name' => DC_RECIPIENTCOMPANYNAME, 'value' => 'recipientCompanyName'],
                 ['name' => DC_ISSUEDATE, 'value' => 'issueDate'],
                 ['name' => DC_CONFIDENCES, 'value' => 'documentClassifierConfidence'],
-            ];
-            }
-        if ($elementID == 'deliveryNoteDetails') {
-            return [
-                ['name' => '-', 'value' => ''],
-                ['name' => DN_RECIPIENTCITY, 'value' => 'recipientCity'],
-                ['name' => DN_RECIPIENTCOMPANYNAME, 'value' => 'recipientCompanyName'],
-                ['name' => DN_RECIPIENTINFO, 'value' => 'recipientInfo'],
-                ['name' => DN_RECIPIENTSTREET, 'value' => 'recipientStreet'],
-                ['name' => DN_RECIPIENTVATNUMBER, 'value' => 'recipientVatNumber'],
-                ['name' => DN_RECIPIENTZIPCODE, 'value' => 'recipientZipCode'],
-
-                ['name' => DN_VENDORCOMPANYNAME, 'value' => 'vendorCompanyName'],
-                ['name' => DN_VENDORINFO, 'value' => 'vendorInfo'],
-                ['name' => DN_VENDORNAME, 'value' => 'vendorName'],
-                ['name' => DN_VENDORSTREET, 'value' => 'vendorStreet'],
-                ['name' => DN_VENDORZIPCODE, 'value' => 'vendorZipCode'],
-                ['name' => DN_VENDOREMAIL, 'value' => 'vendorEmail'],
-                ['name' => DN_VENDORCITY, 'value' => 'vendorCity'],
-                ['name' => DN_VENDORVATNUMBER, 'value' => 'vendorVatNumber'],
             ];
             }
         if ($elementID == 'deliveryNoteDetails') {
