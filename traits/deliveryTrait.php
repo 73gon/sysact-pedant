@@ -1,14 +1,14 @@
 <?php
 /**
- * DocumentClassifierTrait — Document classification workflow: upload and check.
+ * Delivery Note Trait — Delivery Note workflow: upload and check.
  *
- * Contains the documentClassifier() entry point, uploadDocumentClassifier()
- * and checkDocumentClassifier() methods for the Pedant Document Classifier API.
+ * Contains the readDeliveryNote() entry point, uploadDeliveryNote()
+ * and checkDeliveryNote() methods for the Pedant Delivery Note API.
  */
-trait deliveryTrait
+trait DeliveryTrait
   {
   /**
-   * Main entry point for document classification (upload → check cycle).
+   * Main entry point for delivery note analysis (upload → check cycle).
    * Called by the JobRouter framework.
    */
   protected function readDeliveryNote(): void
@@ -49,7 +49,7 @@ trait deliveryTrait
     }
 
   /**
-   * Uploads a document to the Pedant Document Classifier API.
+   * Uploads a document to the Pedant Delivery Note API.
    */
   protected function uploadDeliveryNote(): void
     {
@@ -144,8 +144,8 @@ trait deliveryTrait
     }
 
   /**
-   * Checks the classification status of a previously uploaded document.
-   * If classification is complete, stores extracted data and marks activity as completed.
+   * Checks the status of a previously uploaded document.
+   * If analysis is complete, stores extracted data and marks activity as completed.
    */
   protected function checkDeliveryNote(): void
     {
