@@ -199,7 +199,7 @@ trait FetchTrait
                         UPDATE JRINCIDENTS j
                         JOIN $table_head t ON t.step_id = j.process_step_id
                         SET j.resubmission_date = '$formattedTime'
-                        WHERE t.step = $stepID AND t.fileid = '$id';
+                        WHERE t.step = $stepID AND t.$fileid = '$id';
                         ";
               } elseif ($dbType === "MSSQL") {
               $query = "
