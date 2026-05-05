@@ -230,15 +230,15 @@ class pedantSystemActivity extends AbstractSystemActivityAPI
                 ['name' => DC_VENDORCOMPANYNAME, 'value' => 'vendorCompanyName'],
                 ['name' => DC_RECIPIENTCOMPANYNAME, 'value' => 'recipientCompanyName'],
                 ['name' => DC_ISSUEDATE, 'value' => 'issueDate'],
-                ['name' => DC_CONFIDENCES, 'value' => 'documentClassifierConfidence'],
             ];
             }
+
         if ($elementID == 'confidenceValues') {
             return [
                 ['name' => '-', 'value' => ''],
-                ['name' => NAME, 'value' => 'confidenceName'],
-                ['name' => VALUE, 'value' => 'confidenceValue'],
-                ['name' => REASON, 'value' => 'confidenceReason'],
+                ['name' => CONFIDENCENAME, 'value' => 'confidenceName'],
+                ['name' => CONFIDENCEVALUE, 'value' => 'confidenceValue'],
+                ['name' => CONFIDENCEREASON, 'value' => 'confidenceReason'],
             ];
             }
         $this->logDebug('getUDL() called', ['udl' => $udl, 'elementID' => $elementID]);
