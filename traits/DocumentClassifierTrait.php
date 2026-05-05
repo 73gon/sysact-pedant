@@ -227,10 +227,11 @@ trait DocumentClassifierTrait
           $this->logWarning('Failed to set classification detail table value', ['attribute' => $attribute['id'], 'error' => $e->getMessage()]);
           }
         }
-
+        
         if( $this->isCompleted() === false ){
           $this->markActivityAsCompleted();
-          $this->logInfo('Document classifier completed, activity marked as completed');
+          $doneActivity = $this->isCompleted();
+          $this->logInfo('Document classifier finished: ' . $doneActivity);
         } else {
           $this->logInfo('Document classifier still running');
         }
