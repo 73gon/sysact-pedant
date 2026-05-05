@@ -196,7 +196,7 @@ trait DocumentClassifierTrait
 
       $dataItem = $data['data'][0];
       $status = $dataItem['status'] ?? '';
-      $confidence = $this->buildConfidenceField($dataItem);
+      
       $this->logInfo('Document classifier status received', ['status' => $status]);
 
       if (in_array($status, self::FALSE_STATES)) {
@@ -215,8 +215,9 @@ trait DocumentClassifierTrait
         'vendorCompanyName' => $dataItem['vendorCompanyName'] ?? '',
         'recipientCompanyName' => $dataItem['recipientCompanyName'] ?? '',
         'issueDate' => !empty($dataItem['issueDate']) ? date('d.m.Y', strtotime($dataItem['issueDate'])) : '',
-        'documentClassifierConfidence' => $confidence ?? '',
+        
       ];
+      $this->buildConfidenceField($dataItem);
 
       $this->logDebug('Classification values', $values);
 
@@ -243,7 +244,7 @@ trait DocumentClassifierTrait
       }
     }
 
-  protected function buildConfidenceField(array $dataValues): string{
+  protected function buildConfidenceField(array $dataValues): void{
 
     $attributesConfidence = $this->resolveOutputParameterListAttributes("confidenceValues");
 
@@ -279,13 +280,8 @@ trait DocumentClassifierTrait
 
           foreach ($attributesConfidence as $attribute) {
               $value = isset($valuesTable[$attribute['id']][$i]) ? $valuesTable[$attribute['id']][$i] : '';
-              $this->setSubtableValue(
-                  $attribute['subtable'], 
-                  $rowID + $i, 
-                  $attribute['value'], 
-                  $value
-              );
-          }
+              $this->setSubtableValue($attribute['subtable'], $rowID + $i, $attribute['value'], $value);
+            }
       } catch (Exception $e) {
           $this->logWarning('Failed to set confidence subtable value', [
               'index' => $i, 
