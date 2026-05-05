@@ -261,14 +261,20 @@ trait DocumentClassifierTrait
         'vendorCompanyNameConfidence'  => $dataConfidence['vendorCompanyName'] ?? [],
         'vendorInfoConfidence'         => $dataConfidence['vendorInfo'] ?? [],
     ];
-
+    
+    $this->logDebug("confidenceMapping Fields", ['Confidence' => $confidenceMapping]);
     $valuesTable = [];
     $indexCount = 0;
 
     foreach ($confidenceMapping as $name => $data) {
-        $valuesTable['name'][]       = $name;
+      $this->logDebug("confidenceMapping Fields", [
+        'name' => $name, 
+        'confidence' => $data['confidence'] ?? 'unknown',
+        'reasoning' => $data['reasoning'] ?? 'unknown',
+        ]);
+        $valuesTable['NAME'][]       = $name;
         $valuesTable['confidence'][] = $data['confidence'] ?? '';
-        $valuesTable['reasoning'][]  = $data['reasoning'] ?? '';
+        $valuesTable['REASON'][]  = $data['reasoning'] ?? '';
         $indexCount++;
     }
 
