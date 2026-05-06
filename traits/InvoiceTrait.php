@@ -338,4 +338,4 @@ trait InvoiceTrait
       throw new JobRouterException('Check file error: ' . $e->getMessage());
       }
     }
-  }
+}
