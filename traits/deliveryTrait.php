@@ -28,10 +28,10 @@ trait DeliveryTrait
         }
 
       $dnDocumentId = $this->getSystemActivityVar('DN_DOCUMENTID');
-      $this->logDebug('DeliveryNote state check', ['dnDocumentId' => $dnDocumentId, 'dcUploadCounter' => $dnUploadCounter]);
+      $this->logDebug('DeliveryNote state check', ['dnDocumentId' => $dnDocumentId, 'dnUploadCounter' => $dnUploadCounter]);
 
       if ($dnDocumentId) {
-        $this->logInfo('Document already uploaded, checking classification status', ['documentId' => $dnDocumentId]);
+        $this->logInfo('Document already uploaded, checking file status', ['documentId' => $dnDocumentId]);
         $this->checkDeliveryNote();
         }
 
@@ -68,7 +68,7 @@ trait DeliveryTrait
         }
 
       $fileSizeMB = $fileSizeB / (1024 * 1024);
-      $this->logInfo('Uploading document for classification', [
+      $this->logInfo('Uploading document for analysis', [
         'file' => basename($file),
         'sizeMB' => round($fileSizeMB, 2),
       ]);
@@ -86,7 +86,7 @@ trait DeliveryTrait
         throw new JobRouterException('Invalid input parameter value for flag: ' . $action);
         }
 
-      $this->logDebug('DeliversyNote upload parameters', ['url' => $url, 'action' => $action]);
+      $this->logDebug('Delivery Note upload parameters', ['url' => $url, 'action' => $action]);
 
       $responseData = $this->makeApiRequest(
         $url,
@@ -106,7 +106,7 @@ trait DeliveryTrait
       if ($counter >= $maxCounter && !in_array($httpCode, array_merge(self::SUCCESS_HTTP_CODES, self::RETRY_HTTP_CODES))) {
         $this->setSystemActivityVar('DN_UPLOADCOUNTER', 0);
         $this->logError('Delivery Note upload failed after max retries', null, ['counter' => $counter, 'httpCode' => $httpCode]);
-        throw new JobRouterException('Error occurred during document classifier upload after maximum retries (' . $counter . '). HTTP Code: ' . $httpCode);
+        throw new JobRouterException('Error occurred during delivery Note upload after maximum retries (' . $counter . '). HTTP Code: ' . $httpCode);
         } else {
         $this->setSystemActivityVar('DN_UPLOADCOUNTER', ++$counter);
         $this->logDebug('DN upload counter incremented', ['counter' => $counter]);
@@ -154,7 +154,7 @@ trait DeliveryTrait
       $baseUrl = $this->getBaseUrl();
       $documentId = $this->getSystemActivityVar('DN_DOCUMENTID');
       $url = $baseUrl . '/v1/external/documents/delivery-notes?documentId=' . urlencode($documentId);
-      $maxCounter = $this->resolveInputParameter('dn_maxCounter');
+      $maxCounter = $this->resolveInputParameter('maxCounter');
 
       $this->logDebug('Delivery Note check parameters', ['url' => $url, 'documentId' => $documentId]);
 
