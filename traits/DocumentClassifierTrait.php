@@ -230,8 +230,11 @@ trait DocumentClassifierTrait
         
         if( $this->isCompleted() === false ){
           $this->markActivityAsCompleted();
-          $doneActivity = $this->isCompleted();
+          $doneActivity = $this->isCompleted() == '1';
           $this->logInfo('Document classifier finished: ' . $doneActivity);
+          $this->setResubmission(10, 's');
+          $this->logInfo('Set resubmission time to fix markActivityAsCompleted-bug');
+
         } else {
           $this->logInfo('Document classifier still running');
         }
