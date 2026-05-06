@@ -114,6 +114,7 @@
                     <field id='dc_documentId' name='DC_DOCUMENTID' worktable='yes' subtable='yes' fixed='no' datatype='varchar' required='no'/>
                     <field id='dc_tempJSON' name='DC_TEMPJSON' worktable='yes' subtable='no' fixed='no' datatype='varchar' required='no'/>
                     <list id='classificationDetails' name='CLASSIFICATIONDETAILS' worktable='yes' subtable='yes' fixed='no' datatype='varchar' required='no' udl='yes'/>
+                    <list id='confidenceValues' name='CONFIDENCEVALUES' worktable='no' subtable='yes' fixed='no' datatype='varchar' required='no' udl='yes'/>
                 </outputParameters>
             </function>
             
