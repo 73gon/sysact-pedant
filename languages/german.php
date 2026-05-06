@@ -152,3 +152,4 @@ define('READDELIVERYNOTE_DESC', 'Diese Systemaktivität kann dazu verwendet werd
 define('CONFIDENCENAME', 'Feldname');
 define('CONFIDENCEVALUE', 'Sicherheit');
 define('CONFIDENCEREASON', 'Begründung');
+define('EXTERNAL_CONNECTION', 'Externe Datenbank');

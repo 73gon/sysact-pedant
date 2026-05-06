@@ -1,4 +1,5 @@
 <?php
+
 //v3.0.0
 
 require_once __DIR__ . '/traits/LoggerTrait.php';

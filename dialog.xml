@@ -60,6 +60,7 @@
                     <field id='api_key' name='API_KEY' worktable='yes' subtable='no' fixed='yes' datatype='varchar' required='yes'/>
                     <field id='demo' name='DEMO' worktable='no' subtable='no' fixed='yes' datatype='int' required='no' texttype='checkbox'/>
                     <field id="vendorTable" name="VENDORTABLE" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="yes"/>
+                    <field id='external_connection' name='EXTERNAL_CONNECTION' worktable='no' subtable='no' fixed='yes' datatype='int' texttype='checkbox' required='no'/>
                     <list id="importVendor" name="IMPORTVENDOR" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="no" udl="yes"/>
                 </inputParameters>
                 <outputParameters>
@@ -70,6 +71,7 @@
                     <field id='api_key' name='API_KEY' worktable='yes' subtable='no' fixed='yes' datatype='varchar' required='yes'/>
                     <field id='demo' name='DEMO' worktable='no' subtable='no' fixed='yes' datatype='int' required='no' texttype='checkbox'/>
                     <field id="recipientTable" name="RECIPIENTTABLE" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="yes"/>
+                    <field id='external_connection' name='EXTERNAL_CONNECTION' worktable='no' subtable='no' fixed='yes' datatype='int' texttype='checkbox' required='no'/>
                     <list id="importRecipient" name="IMPORTRECIPIENT" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="no" udl="yes"/>
                 </inputParameters>
                 <outputParameters>
@@ -80,6 +82,7 @@
                     <field id='api_key' name='API_KEY' worktable='yes' subtable='no' fixed='yes' datatype='varchar' required='yes'/>
                     <field id='demo' name='DEMO' worktable='no' subtable='no' fixed='yes' datatype='int' required='no' texttype='checkbox'/>
                     <field id="costCenterTable" name="COSTCENTERTABLE" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="yes"/>
+                    <field id='external_connection' name='EXTERNAL_CONNECTION' worktable='no' subtable='no' fixed='yes' datatype='int' texttype='checkbox' required='no'/>
                     <list id="importCostCenter" name="IMPORTCOSTCENTER" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="no" udl="yes"/>
                 </inputParameters>
                 <outputParameters>

@@ -152,3 +152,4 @@ define('READDELIVERYNOTE_DESC', 'This systemactivity can be used to upload a del
 define('CONFIDENCENAME', 'Field Name');
 define('CONFIDENCEVALUE', 'Confidence Level');
 define('CONFIDENCEREASON', 'Reasoning');
+define('EXTERNAL_CONNECTION', 'External Database');

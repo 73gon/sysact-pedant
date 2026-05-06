@@ -214,8 +214,16 @@ trait ImportTrait
     try {
       $this->logInfo("Starting $entityType import");
 
-      $table = $this->resolveInputParameter($tableParam);
-      $listfields = $this->resolveInputParameterListValues($listParam);
+      $table = $this->resolveInputParameter($tableParam) ?? [];
+      $listfields = $this->resolveInputParameterListValues($listParam) ?? [];
+      $externalConnection = $this->resolveInputParameter('external_connection') == '1';
+
+      $this->logDebug("Resolving input Parameter", [
+        'table' => $table,
+        'listfields' => $listfields,
+        'externalConnection' => $externalConnection,
+      ]);
+      
 
       $list = array();
       foreach ($listfields as $listindex => $listvalue) {
@@ -227,10 +235,27 @@ trait ImportTrait
         $this->logInfo("$entityType import skipped: table parameter is empty");
         return;
         }
-
       // Build SELECT query from field mapping
-      $JobDB = $this->getJobDB();
-
+      if(!$externalConnection){
+        $this->logInfo("Connectiong to internal Database");
+        $DB = $this->getJobDB();
+      } else {
+        $path = __DIR__ . '/../dbCredentials.php';
+        if (file_exists($path)) {
+          try {
+            $this->logInfo("Connecting to external Database");
+            require_once($path);
+            if (!isset($DB) || !$DB instanceof PDO) {
+              throw new JobRouterException("Variable \$DB was not correctly defined in $path.");
+            }
+          } catch (Exception $e){
+            throw new JobRouterException("Failed to load external Database: " . $e->getMessage());
+          }
+        } else {
+            throw new JobRouterException("Database credentials file missing at $path");
+        }
+      }
+  
       $lastKey = null;
       foreach ($list as $listindex => $listvalue) {
         if (!empty($listvalue)) {
@@ -251,23 +276,38 @@ trait ImportTrait
 
       $this->logDebug("$entityType import query", ['query' => $temp]);
 
-      $result = $JobDB->query($temp);
-      $payloads = [];
-
-      while ($row = $JobDB->fetchRow($result)) {
-        $data = [];
-        foreach ($fields as $index => $field) {
-          $value = isset($row[$fields[$index]]) ? $row[$fields[$index]] : '';
-
-          if ($rowTransformers && isset($rowTransformers[$field])) {
-            $data[$field] = $rowTransformers[$field]($value);
+      if(!$externalConnection){
+        $result = $DB->query($temp);
+        $payloads = [];
+        while ($row = $DB->fetchRow($result)) {
+          $data = [];
+          foreach ($fields as $index => $field) {
+            $value = isset($row[$fields[$index]]) ? $row[$fields[$index]] : '';
+            if ($rowTransformers && isset($rowTransformers[$field])) {
+              $data[$field] = $rowTransformers[$field]($value);
             } else {
-            $data[$field] = !empty($value) ? $value : '';
+              $data[$field] = !empty($value) ? $value : '';
             }
           }
         $payloads[] = $data;
         }
-
+      } else {
+        $stmt = $DB->query($temp);
+        $payloads = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+          $data = [];
+          foreach ($fields as $field) {
+              $value = $row[$field] ?? '';
+              if ($rowTransformers && isset($rowTransformers[$field])) {
+                $data[$field] = $rowTransformers[$field]($value);
+              } else {
+                $data[$field] = ($value !== '') ? $value : '';
+              }
+          }
+          $payloads[] = $data;
+        }
+      }
+      
       $this->logInfo("$entityType CSV generated", ['rowCount' => count($payloads)]);
       $this->logDebug("$entityType payloads", ['payloads' => $payloads]);
 
