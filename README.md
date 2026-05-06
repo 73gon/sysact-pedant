@@ -174,11 +174,13 @@ Die Funktion readDeliveryNote dient der automatisierten Auslesung und Metadaten-
 
 **Outputfelder**
 
-| Parameter   | Bedeutung                                 |
-| ----------- | ----------------------------------------- |
-| `FILEID`    | Dokument-ID für spätere Statusabfragen.   |
-| `INVOICEID` | Pedant-interne Rechnungs-ID.              |
-| `TEMPJSON`  | Vollständige Rohantwort der API als JSON. |
+| Parameter             | Bedeutung                                       |
+| --------------------- | ----------------------------------------------- |
+| `FILEID`              | Dokument-ID für spätere Statusabfragen.         |
+| `INVOICEID`           | Pedant-interne Rechnungs-ID.                    |
+| `TEMPJSON`            | Vollständige Rohantwort der API als JSON.       |
+| `COUNTERSUMMARY`      | Zusammenfassung der Upload- und Check-Versuche. |
+| `DELIVERYNOTEDETAILS` | Extrahierte Informationen aus dem Lieferschein  |
 
 # Vorstellung der Import-Funktionen: importVendorCSV / importRecipientCSV / importCostCenterCSV
 
@@ -188,12 +190,14 @@ Diese Funktionen dienen dem Abgleich von Stammdaten zwischen JobRouter und Pedan
 
 **Inputfelder**
 
-| Parameter                                               | Bedeutung                                                                    | Hinweis                                       |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------- |
-| `API_KEY`                                               | Authentifizierungsschlüssel für die Pedant-API.                              | Pflichtfeld                                   |
-| `DEMO`                                                  | Schaltet zwischen Demo- und Produktivumgebung um.                            | Optional                                      |
-| `VENDORTABLE` / `RECIPIENTTABLE` / `COSTCENTERTABLE`    | Name der JobRouter-Tabelle oder View, aus der die Stammdaten gelesen werden. | Je nach Funktion unterschiedlich              |
-| `IMPORTVENDOR` / `IMPORTRECIPIENT` / `IMPORTCOSTCENTER` | Mapping-Liste für die CSV-Erzeugung.                                         | Ordnet Datenbankspalten den Pedant-Feldern zu |
+| Parameter                                               | Bedeutung                                                                          | Hinweis                                                                                |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `API_KEY`                                               | Authentifizierungsschlüssel für die Pedant-API.                                    | Pflichtfeld                                                                            |
+| `DEMO`                                                  | Schaltet zwischen Demo- und Produktivumgebung um.                                  | Optional                                                                               |
+| `EXTERNAL_CONNECTION`                                   | Wenn die Datenbank, aus welcher die Stammdaten stammen, eine externe Datenbank ist | Die Verbindung zur externen Datenbank erfolgt per PDO in der `dbCredentials.php`-Datei |
+| `VENDORTABLE` / `RECIPIENTTABLE` / `COSTCENTERTABLE`    | Name der JobRouter-Tabelle oder View, aus der die Stammdaten gelesen werden.       | Je nach Funktion unterschiedlich                                                       |
+| `IMPORTVENDOR` / `IMPORTRECIPIENT` / `IMPORTCOSTCENTER` | Mapping-Liste für die CSV-Erzeugung.                                               | Ordnet Datenbankspalten den Pedant-Feldern zu                                          |
+
 
 **Outputfelder**
 
