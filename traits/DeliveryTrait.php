@@ -228,11 +228,13 @@ trait DeliveryTrait
 
         if( $this->isCompleted() === false ){
           $this->markActivityAsCompleted();
-          $this->logInfo('Delivery Note completed, activity marked as completed');
+          $doneActivity = $this->isCompleted() == '1';
+          $this->logInfo('DeliveryNote finished: ' . $doneActivity);
+          $this->setResubmission(10, 's');
+          $this->logInfo('Set resubmission time to fix markActivityAsCompleted-bug');
         } else {
-          $this->logInfo('Delivery Note still running');
+          $this->logInfo('Document classifier still running');
         }
-      
       } catch (JobRouterException $e) {
       throw $e;
       } catch (Exception $e) {
