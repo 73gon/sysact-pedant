@@ -508,7 +508,7 @@ Für eine allgemeine Übersicht der Parametern sieh bitte in die [README.md](../
 | Funktion                       | Feld                      | Besonderheit                                                                                                                          |
 | ------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `Rechnung abholen (fetchData)` | File-ID (fileid)          | Hier müssen wir die Namen der Prozesstabellenfeldes eintragen, wo die Werte gespeicher werden. Wir wollen nicht den Value der File-Id |
-| Jede Systemaktivitäten         | UDL-Liste / Konfiguration | Hier müssen wir die Namen der Prozesstabellenfeldes eintragen, wo die Werte gespeicher werden. **NICHT** den Value                    |
+| Jede Systemaktivitäten         | UDL-Liste / Tabellen-Konfiguration | Hier müssen wir die Namen der Prozesstabellenfeldes eintragen, wo die Werte gespeicher werden. **NICHT** den Value                    |
 
 # Fußnoten
 
