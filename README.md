@@ -15,6 +15,8 @@ Inhaltsverzeichnis
   - [Dialogfelder von fetchData](#dialogfelder-von-fetchdata)
 - [Vorstellung von Funktion: documentClassifier](#vorstellung-von-funktion-documentclassifier)
   - [Dialogfelder von documentClassifier](#dialogfelder-von-documentclassifier)
+- [Vorstellung von Funktion: readDeliveryNote](#vorstellung-von-funktion-readdeliverynote)
+  - [Dialogfelder von readDeliveryNote](#dialogfelder-von-readdeliverynote)
 - [Vorstellung der Import-Funktionen: importVendorCSV / importRecipientCSV / importCostCenterCSV](#vorstellung-der-import-funktionen-importvendorcsv--importrecipientcsv--importcostcentercsv)
   - [Dialogfelder der Import-Funktionen](#dialogfelder-der-import-funktionen)
 - [Für Developer](#für-developer)
@@ -143,11 +145,40 @@ Die Funktion documentClassifier dient der automatisierten Einordnung und Metadat
 
 **Outputfelder**
 
-| Parameter               | Bedeutung                                                           |
-| ----------------------- | ------------------------------------------------------------------- |
-| `DC_DOCUMENTID`         | Dokument-ID für spätere Statusabfragen.                             |
-| `DC_TEMPJSON`           | Vollständige Rohantwort der API als JSON.                           |
-| `CLASSIFICATIONDETAILS` | Strukturierte Klassifikation wie Dokumenttyp, Firmenname und Datum. |
+| Parameter               | Bedeutung                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `DC_DOCUMENTID`         | Dokument-ID für spätere Statusabfragen.                                             |
+| `DC_TEMPJSON`           | Vollständige Rohantwort der API als JSON.                                           |
+| `CLASSIFICATIONDETAILS` | Strukturierte Klassifikation wie Dokumenttyp, Firmenname und Datum.                 |
+| `CONFIDENCEVALUES`      | Sammlung der von der KI zurückgegebenen selbstsicherheit in der Auslese der Felder. |
+
+# Vorstellung von Funktion: readDeliveryNote
+
+Die Funktion readDeliveryNote dient der automatisierten Auslesung und Metadaten-Extraktion von Lieferscheinen.
+
+## Dialogfelder von readDeliveryNote
+
+**Inputfelder**
+
+| Parameter     | Bedeutung                                                                                                                  | Hinweis                                                                                |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `API_KEY`     | Authentifizierungsschlüssel für die Pedant-API.                                                                            | Pflichtfeld                                                                            |
+| `DEMO`        | Schaltet zwischen Demo- und Produktivumgebung um.                                                                          | Optional                                                                               |
+| `INPUTFILE`   | Zu klassifizierendes Dokument.                                                                                             | Pflichtfeld                                                                            |
+| `FLAG`        | Upload-Aktion für den Classifier.                                                                                          | Erlaubt: `normal`, `check_extraction`, `skip_review`, `force_skip`; Standard: `normal` |
+| `MAXRETRIES`  | Maximale Anzahl an Check-Versuchen.                                                                                        | Schutz vor Endlosschleifen                                                             |
+| `INTERVAL`    | Wiedervorlage in Minuten.                                                                                                  | Polling-Abstand                                                                        |
+| `MAXFILESIZE` | Maximale Dateigröße in MB.                                                                                                 | Standardwert ohne Eingabe: 20 MB                                                       |
+| `NOTE`        | Optionaler Kommentar, der mit dem Dokument an Pedant übertragen wird und bei der Überprüfung eines Mitarbeiters einsehbar. | Optional                                                                               |
+| `INCIDENT`    | Kennzeichnet den Vorgang für das Logging                                                                                   | Standardwert ohne Eingabe: 20 MB                                                       |
+
+**Outputfelder**
+
+| Parameter   | Bedeutung                                 |
+| ----------- | ----------------------------------------- |
+| `FILEID`    | Dokument-ID für spätere Statusabfragen.   |
+| `INVOICEID` | Pedant-interne Rechnungs-ID.              |
+| `TEMPJSON`  | Vollständige Rohantwort der API als JSON. |
 
 # Vorstellung der Import-Funktionen: importVendorCSV / importRecipientCSV / importCostCenterCSV
 
