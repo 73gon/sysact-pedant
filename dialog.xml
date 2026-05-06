@@ -96,6 +96,28 @@
                     <list id='classificationDetails' name='CLASSIFICATIONDETAILS' worktable='yes' subtable='yes' fixed='no' datatype='varchar' required='no' udl='yes'/>
                 </outputParameters>
             </function>
+            <function id='readDeliveryNote' name='READDELIVERYNOTE' description='READDELIVERYNOTE_DESC'>
+                <inputParameters>
+                    <field id='inputFile' name='INPUTFILE' worktable='yes' subtable='no' fixed='no' datatype='file' required='yes'/>
+					<field id='api_key' name='API_KEY' worktable='yes' subtable='no' fixed='yes' datatype='varchar' required='yes'/>
+                    <field id='demo' name='DEMO' worktable='no' subtable='no' fixed='yes' datatype='varchar' required='no' texttype='checkbox'/>
+                    <field id='maxCounter' name='MAXRETRIES' worktable='no' subtable='no' fixed='yes' datatype='int' required='yes'/>
+					<field id='flag' name='FLAG' desc='FLAG_DESC' worktable='no' subtable='no' fixed='yes' datatype='varchar' required='yes'/>
+                    <field id='flagXML' name='FLAGXML' worktable='no' subtable='no' fixed='yes' datatype='varchar'/>
+                    <field id='new' name='NEWVERSION' worktable='no' subtable='no' fixed='yes' datatype='int' required='yes' texttype='checkbox'/>
+                    <field id='zugferd' name='ZUGFERD' worktable='no' subtable='no' fixed='yes' datatype='int' required='yes' texttype='checkbox'/>
+                    <field id="intervalOld" name="INTERVAL" description="INTERVAL_DESC" worktable="yes" subtable="no" fixed="yes" datatype="int" required="yes"/>
+                    <field id='note' name='NOTE' worktable='yes' subtable='yes' fixed='yes' datatype='varchar'/>
+					<field id='incident' name='INCIDENT' worktable='no' subtable='no' fixed='yes' datatype='varchar' required='yes'/>
+                    <field id='maxFileSize' name='MAXFILESIZE' worktable='yes' subtable='no' fixed='yes' datatype='int' required='no'/>
+
+                </inputParameters>
+                <outputParameters>
+                    <field id='fileID' name='FILEID' worktable='yes' subtable='no' fixed='yes' datatype='varchar' required='yes'/>
+                    <field id='invoiceID' name='INVOICEID' worktable='yes' subtable='no' fixed='no' datatype='varchar' required='no' />
+                    <field id='tempJSON' name='TEMPJSON' worktable='yes' subtable='no' fixed='no' datatype='varchar' required='no' />
+                </outputParameters>
+            </function>
         </functions>
         <simulation>
             <behavior id='EXECUTE' name='CONST_ACT_SIM_EXECUTE' desc='CONST_ACT_SIM_EXECUTE_DESC' />

@@ -1,5 +1,5 @@
 <?php
-//v2.3.1
+//v2.5.0
 
 require_once __DIR__ . '/traits/LoggerTrait.php';
 require_once __DIR__ . '/traits/HelperTrait.php';
@@ -229,7 +229,8 @@ class pedantSystemActivity extends AbstractSystemActivityAPI
                 ['name' => DC_DOCUMENTTYPE, 'value' => 'documentType'],
                 ['name' => DC_VENDORCOMPANYNAME, 'value' => 'vendorCompanyName'],
                 ['name' => DC_RECIPIENTCOMPANYNAME, 'value' => 'recipientCompanyName'],
-                ['name' => DC_ISSUEDATE, 'value' => 'issueDate']
+                ['name' => DC_ISSUEDATE, 'value' => 'issueDate'],
+                ['name' => DC_CONFIDENCES, 'value' => 'documentClassifierConfidence'],
             ];
             }
         $this->logDebug('getUDL() called', ['udl' => $udl, 'elementID' => $elementID]);

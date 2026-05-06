@@ -196,6 +196,7 @@ trait DocumentClassifierTrait
 
       $dataItem = $data['data'][0];
       $status = $dataItem['status'] ?? '';
+      $confidence = $this->buildConfidenceField($dataItem);
       $this->logInfo('Document classifier status received', ['status' => $status]);
 
       if (in_array($status, self::FALSE_STATES)) {
@@ -208,11 +209,13 @@ trait DocumentClassifierTrait
 
       $attributes = $this->resolveOutputParameterListAttributes('classificationDetails');
       $values = [
+        // Values
         'documentClassifierNumber' => $dataItem['documentClassifierNumber'] ?? '',
         'documentType' => $dataItem['documentType'] ?? '',
         'vendorCompanyName' => $dataItem['vendorCompanyName'] ?? '',
         'recipientCompanyName' => $dataItem['recipientCompanyName'] ?? '',
         'issueDate' => !empty($dataItem['issueDate']) ? date('d.m.Y', strtotime($dataItem['issueDate'])) : '',
+        'documentClassifierConfidence' => $confidence ?? '',
       ];
 
       $this->logDebug('Classification values', $values);
@@ -225,8 +228,13 @@ trait DocumentClassifierTrait
           }
         }
 
-      $this->markActivityAsCompleted();
-      $this->logInfo('Document classifier completed, activity marked as completed');
+        if( $this->isCompleted() === false ){
+          $this->markActivityAsCompleted();
+          $this->logInfo('Document classifier completed, activity marked as completed');
+        } else {
+          $this->logInfo('Document classifier still running');
+        }
+      
       } catch (JobRouterException $e) {
       throw $e;
       } catch (Exception $e) {
@@ -234,4 +242,61 @@ trait DocumentClassifierTrait
       throw new JobRouterException('Document classifier check error: ' . $e->getMessage());
       }
     }
-  }
+
+  protected function buildConfidenceField(array $dataValues): string{
+
+      $dataConfidence = $dataValues['documentClassifierDataBoxes'];
+      $values = [
+        'dateConfidence' => [
+          'confidence' => $dataConfidence['documentClassifierDate']['confidence'] ?? '',
+          'reasoning' => $dataConfidence['documentClassifierDate']['reasoning'] ?? '',
+        ],
+        'numberConfidence' => [
+          'confidence' => $dataConfidence['documentClassifierNumber']['confidence'] ?? '',
+          'reasoning' => $dataConfidence['documentClassifierNumber']['reasoning'] ?? '',
+        ],
+        'typeConfidence' => [
+          'confidence' => $dataConfidence['documentClassifierType']['confidence'] ?? '',
+          'reasoning' => $dataConfidence['documentClassifierType']['reasoning'] ?? '',
+        ],
+        'recipientCompanyConfidence' => [
+          'confidence' => $dataConfidence['recipientCompanyName']['confidence'] ?? '',
+          'reasoning' => $dataConfidence['recipientCompanyName']['reasoning'] ?? '',
+        ],
+        'recipientInfoConfidence' => [
+          'confidence' => $dataConfidence['recipientInfo']['confidence'] ?? '',
+          'reasoning' => $dataConfidence['recipientInfo']['reasoning'] ?? '',
+        ],
+        'recipientVatNumberConfidence' => [
+          'confidence' => $dataConfidence['recipientVatNumber']['confidence'] ?? '',
+          'reasoning' => $dataConfidence['recipientVatNumber']['reasoning'] ?? '',
+        ],
+        'vatNumberConfidence' => [
+          'confidence' => $dataConfidence['vatNumber']['confidence'] ?? '',
+          'reasoning' => $dataConfidence['vatNumber']['reasoning'] ?? '',
+        ],
+        'vendorCompanyNameConfidence' => [
+          'confidence' => $dataConfidence['vendorCompanyName']['confidence'] ?? '',
+          'reasoning' => $dataConfidence['vendorCompanyName']['reasoning'] ?? '',
+        ],
+        'vendorInfoConfidence' => [
+          'confidence' => $dataConfidence['vendorInfo']['confidence'] ?? '',
+          'reasoning' => $dataConfidence['vendorInfo']['reasoning'] ?? '',
+        ],
+      ];
+      $string = [];
+      foreach($values as $name => $value ){
+        $string[] = $name . ': [reason: ' . $value['reasoning'] . ', confidence: ' . $value['confidence'] . ']';
+      }
+
+      $this->logDebug('Confidence values fetched', [
+        'function' => 'buildConfidenceField',
+        'values' => $string,
+        ]
+      );
+      return implode( ', ', $string);
+  }  
+  
+}
+
+
