@@ -152,9 +152,10 @@ define('READDELIVERYNOTE_DESC', 'Diese Systemaktivität kann dazu verwendet werd
 define('CONFIDENCENAME', 'Feldname');
 define('CONFIDENCEVALUE', 'Sicherheit');
 define('CONFIDENCEREASON', 'Begründung');
-define('EXTERNAL_CONNECTION', 'Externe Datenbank');
 define('DN_ORDERDATE', 'Bestelldatum');
 define('DN_ORDERNUMBER', 'Bestellnummer');
 define('DN_RECIPIENTCOMPANYNAME', 'Empfänger Firmenname');
 define('DN_VENDORCOMPANYNAME', 'Lieferant Firmenname');
 define('DN_VENDORINFO', 'Lieferant Informationen');
+define('DC_CONFIDENCES', 'Sicherheit');
+

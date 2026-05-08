@@ -152,9 +152,10 @@ define('READDELIVERYNOTE_DESC', 'This systemactivity can be used to upload a del
 define('CONFIDENCENAME', 'Field Name');
 define('CONFIDENCEVALUE', 'Confidence Level');
 define('CONFIDENCEREASON', 'Reasoning');
-define('EXTERNAL_CONNECTION', 'External Database');
 define('DN_ORDERDATE', 'Order date');
 define('DN_ORDERNUMBER', 'Order number');
 define('DN_RECIPIENTCOMPANYNAME', 'Recipient company name');
 define('DN_VENDORCOMPANYNAME', 'Vendor company name');
 define('DN_VENDORINFO', 'Vendor information');
+define('DC_CONFIDENCES', 'Sicherheit');
+
