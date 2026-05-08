@@ -1,5 +1,5 @@
 <?php
-//v2.5.0
+//v3.1.0
 
 require_once __DIR__ . '/traits/LoggerTrait.php';
 require_once __DIR__ . '/traits/HelperTrait.php';
@@ -9,6 +9,7 @@ require_once __DIR__ . '/traits/InvoiceTrait.php';
 require_once __DIR__ . '/traits/FetchTrait.php';
 require_once __DIR__ . '/traits/DataMapperTrait.php';
 require_once __DIR__ . '/traits/DocumentClassifierTrait.php';
+require_once __DIR__ . '/traits/DeliveryTrait.php';
 
 class pedantSystemActivity extends AbstractSystemActivityAPI
     {
@@ -31,6 +32,7 @@ class pedantSystemActivity extends AbstractSystemActivityAPI
     use FetchTrait;
     use DataMapperTrait;
     use DocumentClassifierTrait;
+    use DeliveryTrait;
 
     public function getActivityName()
         {
@@ -230,11 +232,28 @@ class pedantSystemActivity extends AbstractSystemActivityAPI
                 ['name' => DC_VENDORCOMPANYNAME, 'value' => 'vendorCompanyName'],
                 ['name' => DC_RECIPIENTCOMPANYNAME, 'value' => 'recipientCompanyName'],
                 ['name' => DC_ISSUEDATE, 'value' => 'issueDate'],
-                ['name' => DC_CONFIDENCES, 'value' => 'documentClassifierConfidence'],
+            ];
+            }
+
+        if ($elementID == 'confidenceValues') {
+            return [
+                ['name' => '-', 'value' => ''],
+                ['name' => CONFIDENCENAME, 'value' => 'confidenceName'],
+                ['name' => CONFIDENCEVALUE, 'value' => 'confidenceValue'],
+                ['name' => CONFIDENCEREASON, 'value' => 'confidenceReason'],
+            ];
+            }
+        if ($elementID == 'deliveryNoteDetails') {
+            return [
+                ['name' => '-', 'value' => ''],
+                ['name' => DN_ORDERDATE, 'value' => 'orderDate'],
+                ['name' => DN_ORDERNUMBER, 'value' => 'orderNumber'],
+                ['name' => DN_RECIPIENTCOMPANYNAME, 'value' => 'recipientCompanyName'],
+                ['name' => DN_VENDORCOMPANYNAME, 'value' => 'vendorCompanyName'],
+                ['name' => DN_VENDORINFO, 'value' => 'vendorInfo'],
             ];
             }
         $this->logDebug('getUDL() called', ['udl' => $udl, 'elementID' => $elementID]);
         return null;
         }
     }
-

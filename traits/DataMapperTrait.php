@@ -474,7 +474,35 @@ trait DataMapperTrait
       $this->logError('Unexpected error in storeList', $e);
       throw new JobRouterException('Store list error: ' . $e->getMessage());
       }
+      // ── DeliveryNote Details ──────────────────────────────────────────
+      $attributes9 = $this->resolveOutputParameterListAttributes('deliveryNoteDetails');
+      $values9 = [
+        'recipientCity' => $dataItem['recipientCity'],
+        'recipientCompanyName' => $dataItem['recipientCompanyName'],
+        'recipientInfo' => $dataItem['recipientInfo'],
+        'recipientStreet' => $dataItem['recipientStreet'],
+        'recipientVatNumber' => $dataItem['recipientVatNumber'],
+        'recipientZipCode' => $dataItem['recipientZipCode'],
+        'vendorCompanyName' => $dataItem['vendorCompanyName'],
+        'vendorInfo' => $dataItem['vendorInfo'],
+        'vendorName' => $dataItem['vendorName'],
+        'vendorStreet' => $dataItem['vendorStreet'],
+        'vendorZipCode' => $dataItem['vendorZipCode'],
+        'vendorEmail' => $dataItem['vendorEmail'],
+        'vendorCity' => $dataItem['vendorCity'],
+        'vendorVatNumber' => $dataItem['vendorVatNumber'],
+      ];
+
+      foreach ($attributes9 as $attribute) {
+          try {
+            $this->setTableValue($attribute['value'], $values9[$attribute['id']] ?? '');
+            } catch (Exception $e) {
+            $this->logWarning('Failed to set Delivery-Note value', ['attribute' => $attribute['id'], 'error' => $e->getMessage()]);
+            }
+          };
     }
+
+    
 
   /**
    * Converts an audit trail array to CSV format and saves it to a file.
