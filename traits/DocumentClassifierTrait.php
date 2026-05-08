@@ -277,8 +277,8 @@ trait DocumentClassifierTrait
         'reasoning' => $data['reasoning'] ?? 'unknown',
         ]);
         $valuesTable['confidenceName'][]       = $name;
-        $valuesTable['confidenceValue'][] = $data['confidence'] ?? 'none';
-        $valuesTable['confidenceReason'][]  = $data['reasoning'] ?? 'none';
+        $valuesTable['confidenceValue'][] = $data['confidence'] ?? null;
+        $valuesTable['confidenceReason'][]  = $data['reasoning'] ?? null;
         $indexCount++;
     }
 
