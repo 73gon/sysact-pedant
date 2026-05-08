@@ -130,7 +130,7 @@ define('COSTCENTERTABLE', 'Kostenstellentabelle');
 define('COUNTERSUMMARY', 'Counter Zusammenfassung');
 define('AUDITTRAIL', 'Audit Trail');
 define('AUDITTRAILCSV', 'Audit Trail CSV');
-define('DOCUMENT_STATUS', 'Dokumentenstatus (kommagetrennt)');
+define('INVOICE_STATUS', 'Dokumentenstatus (kommagetrennt)');
 define('SYNONYMS', 'Synonyme');
 define('DOCUMENTCLASSIFIER', 'Dokumentenklassifikation');
 define('DOCUMENTCLASSIFIER_DESC', 'Diese Systemaktivität kann dazu verwendet werden, ein Dokument zur Klassifikation hochzuladen.');
