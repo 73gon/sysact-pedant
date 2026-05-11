@@ -15,8 +15,11 @@ Inhaltsverzeichnis
   - [documentClassifier (Dokumentenklassifizikation)](#documentclassifier-dokumentenklassifizikation)
     - [Aufgaben der Systemaktivität (PHP-Code)](#aufgaben-der-systemaktivität-php-code-2)
     - [Aufgaben der KI (Pedant.ai)](#aufgaben-der-ki-pedantai-2)
-  - [importXXX (Lieferant/ Empfänger/ Kostenstelle importieren)](#importxxx-lieferant-empfänger-kostenstelle-importieren)
+  - [readDeliveryNote (Lieferschein auslesen)](#readdeliverynote-lieferschein-auslesen)
     - [Aufgaben der Systemaktivität (PHP-Code)](#aufgaben-der-systemaktivität-php-code-3)
+    - [Aufgaben der KI (Pedant.ai)](#aufgaben-der-ki-pedantai-3)
+  - [importXXX (Lieferant/ Empfänger/ Kostenstelle importieren)](#importxxx-lieferant-empfänger-kostenstelle-importieren)
+    - [Aufgaben der Systemaktivität (PHP-Code)](#aufgaben-der-systemaktivität-php-code-4)
     - [Aufgaben der KI / Plattform (Pedant.ai)](#aufgaben-der-ki--plattform-pedantai)
     - [Unterschiede zwischen den Funktionen](#unterschiede-zwischen-den-funktionen)
 - [Zusätzliche Dateien](#zusätzliche-dateien)
@@ -30,17 +33,19 @@ Inhaltsverzeichnis
     - [Welche Aufgabe erfüllt config.php?](#welche-aufgabe-erfüllt-configphp)
     - [Aufgaben der Datei config.php (Systemkonfiguration)](#aufgaben-der-datei-configphp-systemkonfiguration)
     - [Logging](#logging)
+  - [Vorstellung von Datei: dbCredentials.php](#vorstellung-von-datei-dbcredentialsphp)
+    - [Benötigte Werte in der dbCredentials.php (Systemkonfiguration)](#benötigte-werte-in-der-dbcredentialsphp-systemkonfiguration)
 - [Einrichtung der Systemaktivität](#einrichtung-der-systemaktivität)
   - [Grundlegende systematische Verknüpfungen:](#grundlegende-systematische-verknüpfungen)
   - [Beispiel anhand der Funktion: Rechnung auslesen (pedant)](#beispiel-anhand-der-funktion-rechnung-auslesen-pedant)
     - [Nach Typ sortiert](#nach-typ-sortiert)
-  - [Nach Struktur sortiert](#nach-struktur-sortiert)
-  - [Beispielwerte](#beispielwerte)
+  - [Nach Struktur sortiert (Wie in der dialog.xml)](#nach-struktur-sortiert-wie-in-der-dialogxml)
+  - [Beispielwerte einer eingerichteten Systemaktivität](#beispielwerte-einer-eingerichteten-systemaktivität)
   - [Besonderheiten bei den Systemaktivitäten](#besonderheiten-bei-den-systemaktivitäten)
 - [Fußnoten](#fußnoten)
 
 # Allgemein
-Für zusätzliche Informationen zu JobRouter Systemaktivitäten siehe in die Dokumentation von JobRouter. Du findest die Dokumentation unter `"Hilfe"` -> `"Handbücher"` -> `"Entwickler"` -> `"Systemaktivität"`
+Für zusätzliche Informationen zur JobRouter-Systemaktivitäten siehe in die Dokumentation von JobRouter. Du findest die Dokumentation unter `"Hilfe"` -> `"Handbücher"` -> `"Entwickler"` -> `"Systemaktivität"`
 
 ![hilfe](../staticFiles/docimages/help.png)
 
@@ -68,6 +73,8 @@ Diese Traits enthalten die fachliche Hauptlogik für die in der dialog.xml defin
 
 - **DocumentClassifierTrait.php (documentClassifier)**: Spezialisierter Baustein für die Dokumentenklassifizierung. Er kommuniziert mit der Classifier-API von Pedant, um Dokumenttypen (z. B. Lieferschein vs. Rechnung) zu bestimmen.
 
+- **DeliveryTrait (readDeliveryNote)**: Spezialisierter Baustein für die Auslese und Analyse von Lieferscheinen. Er kommuniziert mit der DeliverNotes-API von Pedant, um spezialisiert Lieferscheine auszulesen.
+
 - **FetchTrait.php (fetchData)**: Verantwortlich für den Batch-Abruf. Er identifiziert fertig verarbeitete Dokumente auf der Plattform und berücksichtigt dabei konfigurierte Arbeitszeiten und Wochenenden, um die Workflow-Schritte in JobRouter wieder zu aktivieren.
 
 - **ImportTrait.php (import...CSV)**: Regelt den Stammdatenabgleich. Er extrahiert Daten (Kreditoren, Kostenstellen etc.) aus JobRouter-Tabellen, generiert CSV-Dateien und übermittelt diese an die Pedant-API.
@@ -93,16 +100,18 @@ Die folgende Tabelle zeigt, welche funktionalen Bausteine auf welche Infrastrukt
 | FetchTrait (Batch-Abruf)  | Ja                 | Nein                 | Ja                    | Ja                    |
 | ImportTrait (Stammdaten)  | Ja                 | Nein                 | Ja                    | Nein                  |
 | DocumentClassifierTrait   | Ja                 | Nein                 | Ja                    | Nein                  |
+| DeliveryTrait             | Ja                 | Nein                 | Ja                    | Nein                  |
 
 
 
 # Funktionsregistrierung
 
-In unserem Fall lassen sich in der dialog.xml 6 Funktionen wiederfinden:
+In unserem Fall lassen sich in der dialog.xml 7 Funktionen wiederfinden:
 
 - pedant
 - fetchData
 - documentClassifier
+- readDeliveryNote
 - importVendorCSV
 - importRecipientCSV
 - importCostCenterCSV
@@ -184,6 +193,36 @@ Die Hauptaufgabe dieser Funktion ist die Vorklassifizierung von Dokumenten. Sie 
 
 - ID-Vergabe: Erzeugung einer eindeutigen documentClassifierNumber für die Referenzierung.
 
+## readDeliveryNote (Lieferschein auslesen)
+Die primäre Aufgabe dieser Funktion ist die automatisierte Extraktion von Informationen aus Lieferscheinen. Sie steuert den gesamten Lebenszyklus – vom Hochladen des Dokuments bis hin zur Übernahme der erkannten Daten in die JobRouter-Umgebung. Wie bei der Rechnungsverarbeitung sorgt diese Funktion dafür, dass unstrukturierte Belege in verwertbare Prozessdaten umgewandelt werden.
+
+### Aufgaben der Systemaktivität (PHP-Code)
+
+- Zustandssteuerung (State Machine): Verwaltung der internen Variablen DN_UPLOADCOUNTER und DN_DOCUMENTID, um den Fortschritt zwischen Upload- und Abfrage-Phase zu kontrollieren.
+
+- Validierung: Prüfung der Eingabedatei auf Existenz und Einhaltung der maximal zulässigen Dateigröße (maxFileSize).
+
+- API-Kommunikation: Durchführung von HTTPS-Requests an die Pedant-API (POST für den Upload, GET für die Statusabfrage).
+
+- Wiedervorlage-Management: Automatisches Setzen des Resubmission-Intervalls, damit der Prozess pausiert, solange die KI-Analyse noch läuft.
+
+- Fehlerbehandlung & Retries: Überwachung der API-Antworten und Steuerung der Wiederholungsversuche (maxCounter) bei technischen Problemen.
+
+- Daten-Mapping: Übertragung der extrahierten JSON-Werte (z. B. Bestelldatum, Lieferantenname, Bestellnummer) in die JobRouter-Ausgabeparameter und Untertabellen.
+
+- Abschluss: Explizite Markierung der Systemaktivität als "abgeschlossen" (markActivityAsCompleted), sobald valide Daten vorliegen.
+
+### Aufgaben der KI (Pedant.ai)
+
+- Lieferschein-Analyse: Spezialisierte OCR- und Inhaltsanalyse zur Erkennung von lieferscheintypischen Merkmalen.
+
+- Extraktion von Metadaten: Identifikation von spezifischen Feldern wie orderDate (Bestelldatum) und orderNumber (Bestellnummer).
+
+- Absender- & Empfängeridentifikation: Erkennung von vendorCompanyName und recipientCompanyName aus dem Dokumententext.
+
+- Status-Bereitstellung: Rückmeldung über den aktuellen Verarbeitungsstatus, bis die Analyse finalisiert wurde.
+
+
 ## importXXX (Lieferant/ Empfänger/ Kostenstelle importieren)
 Die Hauptaufgabe dieser Funktionen ist die Synchronisation von Stammdaten. Durch den regelmäßigen Export von Daten aus JobRouter und den anschließenden Import in Pedant.ai wird sichergestellt, dass die KI aktuelle Informationen (z. B. Adressdaten, Bankverbindungen oder Kostenstellennummern) besitzt. Dies erhöht die Erkennungsrate und Zuordnungsqualität bei der Dokumentenanalyse signifikant.
 
@@ -249,18 +288,19 @@ Beispielfelder:
 
  <list id="importVendor" name="IMPORTVENDOR" worktable="yes" subtable="no" fixed="yes" datatype="varchar" required="no" udl="yes"/>
 ```
-| Attribut | Erklärung | Erlaubter Input | 
-| ---- | ---- | ----| 
-| category | | `field` oder `list` |
-| id | | |
-| name | | |
-| worktable | | |
-| subtable | | |
-| fixed | | |
-| datatype | | |
-| requiered | | |
-| texttype | | |
-| texttype | | |
+| Attribut  | Erklärung                                                                                                                                  | Erlaubter Input                                                |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------- |
+| category  | Hier wird bestimmt ob das Feld ein einzelnes Eingabefeld ist oder eine Liste. Die Listenfelder werden in der Systemaktivität definiert.    | `field` oder `list` (Bei `List`ist `udl = "yes"`)              |
+| id        | Das ist der technische Name, den du später in deinem PHP-Code verwendest, um auf den Wert zuzugreifen. Er darf keine Leerzeichen enthalten |                                                                |
+| name      | Der Anzeigename im Designer. Wobei dieser in den Datein `english.php` & `german.php` übersetzt wird, sofern ein Eintrag besteht            |                                                                |
+| desc      | Die Beschreibung. Dieser Text erscheint oft als Tooltip oder Hilfetext im Designer, um dem Admin zu erklären, was er hier eintragen muss.  |                                                                |
+| worktable | Wenn yes, kann der Benutzer ein Feld aus der Hauptprozesstabelle wählen                                                                    |                                                                |
+| subtable  | Wenn yes, kann der Benutzer ein Feld aus einer Untertabelle wählen                                                                         |                                                                |
+| fixed     | Wenn yes, kann der Benutzer einen festen Text direkt in das Konfigurationsfeld schreiben                                                   |                                                                |
+| datatype  | Legt fest, welcher Datentyp erwartet wird                                                                                                  | `varchar` für Text, `integer` für Zahlen oder `date` für Daten |
+| requiered | Festlegung, ob das Feld ein Pflichtfeld ist oder nicht.                                                                                    |                                                                |
+| texttype  | Wenn statt einem Eingabefeld eine Checkbox gewünscht ist                                                                                   | `texttype='checkbox'` ist der einzige erlaubte Input           |
+| udl       | Das ist für Felder, welche als `lsit`definiert werden. Wenn `udl = 'yes'`, können beliebig viele Unterfelder definiert werden.             | `texttype='checkbox'` ist der einzige erlaubte Input           |
 
 
 
@@ -329,6 +369,53 @@ Die Hauptaufgabe dieser Datei ist die Bereitstellung von globalen Steuerungspara
 
 Details zu Support-Fällen findest du in der [SUPPORT.md-Datei](./SUPPORT.md)
 
+## Vorstellung von Datei: dbCredentials.php
+
+Diese Datei dient als Speicherpunkt der Credentials für externe Datenbanken, welcher per PDO verbunden werden.
+Die Hauptaufgabe dieser Datei ist die Bereitstellung von Datenbankcredentials, wenn der Kunde nicht die JobRouter-Datenbank verwendet, sondern seine Informationen in einer anderen Datenbank hinterlegt hat. Diese Informationen werden im importTrait aufgerufen und verarbeitet.
+
+### Benötigte Werte in der dbCredentials.php (Systemkonfiguration)
+
+- Zusammensetzung der wichtigsten Zugangsinformationen
+
+- Benötigte Werte: `host`[^host], `database`[^database], `user`[^user], `password`[^password], `servertyp`[^servertyp].
+
+
+Damit die Verbindung funktioniert, wird die Variable `$dsn` im `try`-Block basierend auf diesen Werten automatisch zusammengesetzt. Es müssen, je nach Datenbank, nur die Variablen benannt werden.
+```
+$host     = "HOST";
+$database = "EXPORT_STAMMDATEN";
+$user     = "jr_admin";
+$password = "6zbnjkdsdfhj"; //fiktives Passwort
+$servertyp = "sqlsrv";
+
+try {
+    $dsn = "$servertyp:Server=$host;Database=$database";
+    
+    $DB = new PDO($dsn, $user, $password);
+
+    $DB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+}
+```
+
+Gleichzeitig muss in der php.ini die entsprechende Extension zur passenden Datenbank aktiviert werden.
+```
+- extension=pdo_mysql (für MySQL/MariaDB)
+
+- extension=pdo_sqlite (für SQLite)
+
+- extension=pdo_pgsql (für PostgreSQL)
+```
+| Präfix | Datenbank       | Beispiel DSN                                       |
+| ------ | --------------- | -------------------------------------------------- |
+| mssql  | Microsoft SQL   | `$servertyp:Server=$host;Database=$database`       |
+| mysql  | MySQL / MariaDB | `$mysql:host=$host;dbname=$database`               |
+| pgsql  | PostgreSQL      | `$servertyp:host=$host;port=5432;dbname=$database` |
+
+Für weitere Informationen bezüglich PDO, siehe [das Php-PDO Tutorial](https://www.phptutorial.net/php-pdo/).
+
+
 # Einrichtung der Systemaktivität
 
 Es gibt drei Kategorien der einzustellenden Felder:
@@ -343,17 +430,17 @@ Diese Einstellungen werden mit dem Kunden besprochen und vom ihm entschieden.
 
 - **Datenbank- & Prozesstabellenverknüpfung**
 
-Diese Einstellungen hängen von der Prozesstruktur und benennung der Felder ab
+Diese Einstellungen hängen von der Prozesstruktur und benennung der Felder ab.
 
 
 ## Grundlegende systematische Verknüpfungen:
 
 Unter diese Kategorie fallen Felder wie `Eingabedatei (inputFile)` oder `API-Key (api_key)`. 
-Das Grundprinzip ist bei diesen Feldern, über Mandatenübergreifend das selbe Prinzip.
+Das Grundprinzip ist bei diesen Feldern, mandatenübergreifend das selbe Prinzip.
 Diese Felder werden eingerichtet, empfangen den selben Parameter und arbeiten mit diesen Einstellungen.
 
 ## Beispiel anhand der Funktion: Rechnung auslesen (pedant)
-Für spezifische Informationen zu den Parametern sieh bitte in die [README.md](../README.md)
+Für eine allgemeine Übersicht der Parametern sieh bitte in die [README.md](../README.md)
 
 ### Nach Typ sortiert
 | Inputparameter                    | Variablenname    | System-Typ                               | Kommentar                                                                                                                        |
@@ -379,7 +466,7 @@ Für spezifische Informationen zu den Parametern sieh bitte in die [README.md](.
 | `Lieferantenkonfiguration`        | `importVendor`   | Datenbank- & Prozesstabellenverknüpfung  | Dies ist eine "UDL-Liste"                                                                                                        |
 
 
-## Nach Struktur sortiert
+## Nach Struktur sortiert (Wie in der dialog.xml)
 | Inputparameter                    | Variablenname    | System-Typ                               | Kommentar                                                                                                                       |
 | --------------------------------- | ---------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `Eingabedatei`                    | `inputFile`      | Grundlegende systematische Verknüpfungen |
@@ -394,12 +481,11 @@ Für spezifische Informationen zu den Parametern sieh bitte in die [README.md](.
 | `Ausführungsintervall in Minuten` | `intervalOld`    | Kundenentscheidungen                     | Dies ist nur bei Versionen **VOR Version 2.0.0** wichtig. Wenn wir mit dem neuen System arbeiten, ist der Input hier irrelevant |
 | `Nachricht`                       | `note`           | Datenbank- & Prozesstabellenverknüpfung  | Dieser Kommentar wird NICHT von der KI verarbeitet                                                                              |
 | `Vorgang`                         | `incident`       | Grundlegende systematische Verknüpfungen | Grundsätzlich: `[jr_incident]`                                                                                                  |
-| `Vorgang`                         | `incident`       | Grundlegende systematische Verknüpfungen | Grundsätzlich: `[jr_incident]`                                                                                                  |
-| `Maximale Dateigröße`             | `maxFileSize`    | Grundlegende systematische Verknüpfungen | Grundsätzlich: `[jr_incident]`                                                                                                  |
+| `Maximale Dateigröße`             | `maxFileSize`    | Grundlegende systematische Verknüpfungen | Default ist `20`                                                                                                                |
 | `Lieferanten-Tabelle`             | `vendorTable`    | Datenbank- & Prozesstabellenverknüpfung  |
 | `Lieferantenkonfiguration`        | `importVendor`   | Datenbank- & Prozesstabellenverknüpfung  |
 
-## Beispielwerte
+## Beispielwerte einer eingerichteten Systemaktivität
 | Inputparameter                    | Variablenname    | Ressource        | Value                  |
 | --------------------------------- | ---------------- | ---------------- | ---------------------- |
 | `Eingabedatei`                    | `inputFile`      | `Prozesstabelle` | `INVOICE`              |
@@ -422,8 +508,7 @@ Für spezifische Informationen zu den Parametern sieh bitte in die [README.md](.
 | Funktion                       | Feld                      | Besonderheit                                                                                                                          |
 | ------------------------------ | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `Rechnung abholen (fetchData)` | File-ID (fileid)          | Hier müssen wir die Namen der Prozesstabellenfeldes eintragen, wo die Werte gespeicher werden. Wir wollen nicht den Value der File-Id |
-| Jede ` `                       | UDL-Liste / Konfiguration | Hier müssen wir die Namen der Prozesstabellenfeldes eintragen, wo die Werte gespeicher werden. **NICHT** den Value der File-Id        |
-|                                |                           |                                                                                                                                       |
+| Jede Systemaktivitäten         | UDL-Liste / Tabellen-Konfiguration | Hier müssen wir die Namen der Prozesstabellenfeldes eintragen, wo die Werte gespeicher werden. **NICHT** den Value                    |
 
 # Fußnoten
 
@@ -434,3 +519,13 @@ Für spezifische Informationen zu den Parametern sieh bitte in die [README.md](.
 [^error]: Protokolliert nur Ausnahmen und schwerwiegende Fehler. Minimale Ausgabe. Für den Einsatz in stabilen Produktionsumgebungen.
 
 [^debug]: Protokolliert ALLES: Abfragen, Variablen, Daten nach jeder Änderung, vollständige API-Anfrage- und Antworttexte. Die Protokolldateien wachsen schnell an (GB). Nur zur Fehlerbehebung bei bestimmten Problemen verwenden.
+
+[^host]: host: Die Adresse des Datenbankservers. Meistens ist dies localhost, wenn die Datenbank auf demselben Server wie das Skript läuft, oder eine spezifische IP-Adresse/Domain eines externen Datenbankservers.
+
+[^database]: database: Der spezifische Name der Datenbank innerhalb des Datenbank-Managementsystems, auf die zugegriffen werden soll und in der sich die Tabellen befinden.
+
+[^user]: user: Der Benutzername, der für die Authentifizierung am Datenbankserver verwendet wird. Dieser Benutzer muss über die entsprechenden Berechtigungen (z. B. SELECT, INSERT) für die Ziel-Datenbank verfügen.
+
+[^password]: password: Das zugehörige Passwort für den angegebenen Datenbank-Benutzer. Aus Sicherheitsgründen sollte dieses Feld niemals im Klartext in öffentlich zugänglichen Repositories landen.
+
+[^servertyp]: servertyp: Gibt das Treibersystem an (z. B. mysql, pgsql oder mssql), das für den Data Source Name (DSN) benötigt wird. PDO nutzt diesen Präfix, um zu wissen, wie es mit dem jeweiligen Server kommunizieren soll.

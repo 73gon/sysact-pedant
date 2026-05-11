@@ -236,7 +236,7 @@ trait ImportTrait
 
       // Build SELECT query from field mapping
       $this->logInfo("Connectiong to internal Database");
-      $DB = $this->getJobDB();
+      $JobDB = $this->getJobDB();
   
       $lastKey = null;
       foreach ($list as $listindex => $listvalue) {
@@ -260,7 +260,7 @@ trait ImportTrait
 
       $result = $DB->query($temp);
       $payloads = [];
-      while ($row = $DB->fetchRow($result)) {
+      while ($row = $JobDB->fetchRow($result)) {
         $data = [];
         foreach ($fields as $index => $field) {
           $value = isset($row[$fields[$index]]) ? $row[$fields[$index]] : '';
