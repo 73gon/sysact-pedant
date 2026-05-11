@@ -33,6 +33,8 @@ Inhaltsverzeichnis
     - [Welche Aufgabe erfüllt config.php?](#welche-aufgabe-erfüllt-configphp)
     - [Aufgaben der Datei config.php (Systemkonfiguration)](#aufgaben-der-datei-configphp-systemkonfiguration)
     - [Logging](#logging)
+  - [Vorstellung von Datei: dbCredentials.php](#vorstellung-von-datei-dbcredentialsphp)
+    - [Benötigte Werte in der dbCredentials.php (Systemkonfiguration)](#benötigte-werte-in-der-dbcredentialsphp-systemkonfiguration)
 - [Einrichtung der Systemaktivität](#einrichtung-der-systemaktivität)
   - [Grundlegende systematische Verknüpfungen:](#grundlegende-systematische-verknüpfungen)
   - [Beispiel anhand der Funktion: Rechnung auslesen (pedant)](#beispiel-anhand-der-funktion-rechnung-auslesen-pedant)
@@ -366,6 +368,53 @@ Die Hauptaufgabe dieser Datei ist die Bereitstellung von globalen Steuerungspara
 - Für Supportfälle sollten nach Möglichkeit immer `INCIDENT`, `TEMPJSON` und `COUNTERSUMMARY` mitgeführt werden.
 
 Details zu Support-Fällen findest du in der [SUPPORT.md-Datei](./SUPPORT.md)
+
+## Vorstellung von Datei: dbCredentials.php
+
+Diese Datei dient als Speicherpunkt der Credentials für externe Datenbanken, welcher per PDO verbunden werden.
+Die Hauptaufgabe dieser Datei ist die Bereitstellung von Datenbankcredentials, wenn der Kunde nicht die JobRouter-Datenbank verwendet, sondern seine Informationen in einer anderen Datenbank hinterlegt hat. Diese Informationen werden im importTrait aufgerufen und verarbeitet.
+
+### Benötigte Werte in der dbCredentials.php (Systemkonfiguration)
+
+- Zusammensetzung der wichtigsten Zugangsinformationen
+
+- Benötigte Werte: `host`[^host], `database`[^database], `user`[^user], `password`[^password], `servertyp`[^servertyp].
+
+
+Damit die Verbindung funktioniert, wird die Variable `$dsn` im `try`-Block basierend auf diesen Werten automatisch zusammengesetzt. Es müssen, je nach Datenbank, nur die Variablen benannt werden.
+```
+$host     = "HOST";
+$database = "EXPORT_STAMMDATEN";
+$user     = "jr_admin";
+$password = "6zbnjkdsdfhj"; //fiktives Passwort
+$servertyp = "sqlsrv";
+
+try {
+    $dsn = "$servertyp:Server=$host;Database=$database";
+    
+    $DB = new PDO($dsn, $user, $password);
+
+    $DB->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+}
+```
+
+Gleichzeitig muss in der php.ini die entsprechende Extension zur passenden Datenbank aktiviert werden.
+```
+- extension=pdo_mysql (für MySQL/MariaDB)
+
+- extension=pdo_sqlite (für SQLite)
+
+- extension=pdo_pgsql (für PostgreSQL)
+```
+| Präfix | Datenbank       | Beispiel DSN                                       |
+| ------ | --------------- | -------------------------------------------------- |
+| mssql  | Microsoft SQL   | `$servertyp:Server=$host;Database=$database`       |
+| mysql  | MySQL / MariaDB | `$mysql:host=$host;dbname=$database`               |
+| pgsql  | PostgreSQL      | `$servertyp:host=$host;port=5432;dbname=$database` |
+
+Für weitere Informationen bezüglich PDO, siehe [das Php-PDO Tutorial](https://www.phptutorial.net/php-pdo/).
+
 
 # Einrichtung der Systemaktivität
 
