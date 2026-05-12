@@ -194,7 +194,6 @@ Diese Funktionen dienen dem Abgleich von Stammdaten zwischen JobRouter und Pedan
 | ------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `API_KEY`                                               | Authentifizierungsschlüssel für die Pedant-API.                                    | Pflichtfeld                                                                            |
 | `DEMO`                                                  | Schaltet zwischen Demo- und Produktivumgebung um.                                  | Optional                                                                               |
-| `EXTERNAL_CONNECTION`                                   | Wenn die Datenbank, aus welcher die Stammdaten stammen, eine externe Datenbank ist | Die Verbindung zur externen Datenbank erfolgt per PDO in der `dbCredentials.php`-Datei |
 | `VENDORTABLE` / `RECIPIENTTABLE` / `COSTCENTERTABLE`    | Name der JobRouter-Tabelle oder View, aus der die Stammdaten gelesen werden.       | Je nach Funktion unterschiedlich                                                       |
 | `IMPORTVENDOR` / `IMPORTRECIPIENT` / `IMPORTCOSTCENTER` | Mapping-Liste für die CSV-Erzeugung.                                               | Ordnet Datenbankspalten den Pedant-Feldern zu                                          |
 
