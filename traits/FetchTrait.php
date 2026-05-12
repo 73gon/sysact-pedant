@@ -6,7 +6,7 @@
  * and fetchInvoices() which pages through the API and updates the DB.
  */
 trait FetchTrait
-  {
+{
   private static array $VALID_INVOICE_STATUSES = ['reviewed', 'exported', 'rejected', 'archived'];
 
   /**
@@ -15,7 +15,7 @@ trait FetchTrait
    * then fetches invoices from the API.
    */
   protected function fetchData(): void
-    {
+  {
     $this->cleanOldLogs();
     $this->logInfo('Starting fetchData');
     try {
@@ -25,8 +25,11 @@ trait FetchTrait
       $worktime = $this->resolveInputParameter('worktime');
       $weekend = $this->resolveInputParameter('weekend');
 
+      $nowBerlin = new DateTime('now', new DateTimeZone('Europe/Berlin'));
       list($startTime, $endTime) = array_map('intval', explode(',', $worktime));
-      list($currentHour, $currentDayOfWeek) = [(int) (new DateTime())->format('G'), (int) (new DateTime())->format('w')];
+      $currentHour = (int) $nowBerlin->format('G');
+      $currentDayOfWeek = (int) $nowBerlin->format('w');
+      $servertime = (int) (new DateTime())->format('G');
 
       $this->logDebug('FetchData schedule parameters', [
         'interval' => $interval,
@@ -36,41 +39,43 @@ trait FetchTrait
         'endTime' => $endTime,
         'currentHour' => $currentHour,
         'currentDayOfWeek' => $currentDayOfWeek,
+        'timezone' => $nowBerlin,
+        'currentServerTime' => $servertime,
       ]);
 
       if ($weekend) {
         if ($currentHour >= $startTime && $currentHour < $endTime) {
           $this->setResubmission($interval, 'm');
-          } else {
+        } else {
           $hoursToStart = ($currentHour < $startTime) ? $startTime - $currentHour : 24 - $currentHour + $startTime;
           $this->setResubmission($hoursToStart, 'h');
-          }
-        } else {
+        }
+      } else {
         if ($currentDayOfWeek >= 1 && $currentDayOfWeek <= 5) {
           if ($currentHour >= $startTime && $currentHour < $endTime) {
             $this->setResubmission($interval, 'm');
-            } else {
+          } else {
             $hoursToStart = ($currentHour < $startTime) ? $startTime - $currentHour : 24 - $currentHour + $startTime;
             $this->setResubmission($hoursToStart, 'h');
-            }
-          } else {
+          }
+        } else {
           $hoursToStart = ($currentHour < $startTime) ? $startTime - $currentHour : 24 - $currentHour + $startTime;
           if ($currentDayOfWeek == 6) {
             $hoursToStart += 24;
-            }
-          $this->setResubmission($hoursToStart, 'h');
           }
+          $this->setResubmission($hoursToStart, 'h');
         }
+      }
 
       $this->fetchInvoices();
-      } catch (JobRouterException $e) {
+    } catch (JobRouterException $e) {
       $this->logError('Fetch data failed', $e);
       throw $e;
-      } catch (Exception $e) {
+    } catch (Exception $e) {
       $this->logError('Unexpected error in fetchData', $e);
       throw new JobRouterException('Fetch data error: ' . $e->getMessage());
-      }
     }
+  }
 
   /**
    * Fetches invoices from the Pedant API and updates the resubmission date in the database.
@@ -78,12 +83,12 @@ trait FetchTrait
    * @throws Exception If the database type is unsupported or if the query fails.
    */
   protected function fetchInvoices(): void
-    {
+  {
     try {
       $invoice_status = $this->resolveInputParameter('invoice_status');
       if (empty($invoice_status)) {
         $invoice_status = 'reviewed';
-        }
+      }
 
       $statusValues = [];
       if (!empty($invoice_status)) {
@@ -94,10 +99,10 @@ trait FetchTrait
           if (!in_array($status, self::$VALID_INVOICE_STATUSES, true)) {
             $this->logError('Invalid invoice status', null, ['status' => $status]);
             throw new JobRouterException('Invalid invoice status: ' . $status);
-            }
-          $statusValues[] = $status;
           }
+          $statusValues[] = $status;
         }
+      }
 
       $this->logInfo('Fetching invoices', ['statuses' => $statusValues]);
 
@@ -106,9 +111,9 @@ trait FetchTrait
         $queryParts = [];
         foreach ($statusValues as $status) {
           $queryParts[] = 'status=' . rawurlencode($status);
-          }
-        $statusQuery = '?' . implode('&', $queryParts);
         }
+        $statusQuery = '?' . implode('&', $queryParts);
+      }
 
       $baseURL = $this->getBaseUrl();
       $url_invoice = "$baseURL/v1/external/documents/invoices/to-export" . $statusQuery;
@@ -126,22 +131,22 @@ trait FetchTrait
         try {
           $responseData = $this->makeApiRequest($url, 'GET');
           $response = $responseData['response'];
-          } catch (JobRouterException $e) {
+        } catch (JobRouterException $e) {
           $this->logWarning('Fetch invoices request failed, skipping URL', ['url' => $url, 'error' => $e->getMessage()]);
           continue;
-          }
+        }
 
         $data = json_decode($response, TRUE);
 
         if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
           $this->logWarning('Failed to parse fetch invoices response', ['json_error' => json_last_error_msg(), 'url' => $url]);
           continue;
-          }
+        }
 
         if (!isset($data['data']) || !is_array($data['data'])) {
           $this->logWarning('Invalid fetch invoices response structure', ['url' => $url]);
           continue;
-          }
+        }
 
         $pageCount = isset($data['pageCount']) ? (int) $data['pageCount'] : 1;
         $allIds = array_merge($allIds, $data['data']);
@@ -156,25 +161,25 @@ trait FetchTrait
           try {
             $responseData = $this->makeApiRequest($url, 'GET');
             $response = $responseData['response'];
-            } catch (JobRouterException $e) {
+          } catch (JobRouterException $e) {
             $this->logWarning('Fetch invoices failed on page', ['url' => $url, 'page' => $currentPage, 'error' => $e->getMessage()]);
             continue;
-            }
+          }
 
           $data = json_decode($response, TRUE);
 
           if ($data === null && json_last_error() !== JSON_ERROR_NONE) {
             $this->logWarning('Failed to parse fetch invoices response on page', ['json_error' => json_last_error_msg(), 'url' => $url, 'page' => $currentPage]);
             continue;
-            }
+          }
 
           if (!isset($data['data']) || !is_array($data['data'])) {
             $this->logWarning('Invalid fetch invoices response structure on page', ['url' => $url, 'page' => $currentPage]);
             continue;
-            }
+          }
 
           $allIds = array_merge($allIds, $data['data']);
-          }
+        }
 
         $this->logInfo('Invoices collected', ['totalIds' => count($allIds), 'pages' => $pageCount, 'url' => $baseUrl]);
 
@@ -183,13 +188,9 @@ trait FetchTrait
         $stepID = $this->resolveInputParameter('stepID');
         $fileid = $this->resolveInputParameter('fileid'); //We need the name of the Tablefield, not the value of that tablefield
 
-        $currentTime = new DateTime();
-        $currentTime->modify('+10 seconds');
-        $formattedTime = $currentTime->format('Y-m-d H:i:s');
-
         if (!empty($allIds)) {
           $this->logInfo('Triggering resubmission for invoices', ['count' => count($allIds), 'ids' => $allIds]);
-          }
+        }
 
         foreach ($allIds as $id) {
           try {
@@ -198,21 +199,21 @@ trait FetchTrait
               $query = "
                         UPDATE JRINCIDENTS j
                         JOIN $table_head t ON t.step_id = j.process_step_id
-                        SET j.resubmission_date = '$formattedTime'
-                        WHERE t.step = $stepID AND t.$fileid = '$id';
+                        SET j.resubmission_date = DATE_ADD(NOW(), INTERVAL 10 SECOND)
+                        WHERE t.step = $stepID AND t.fileid = '$id';
                         ";
-              } elseif ($dbType === "MSSQL") {
+            } elseif ($dbType === "MSSQL") {
               $query = "
                         UPDATE j
-                        SET j.resubmission_date = '$formattedTime'
+                        SET j.resubmission_date = DATEADD(second, 10, GETDATE())
                         FROM JRINCIDENTS AS j
                         JOIN $table_head AS t ON t.step_id = j.process_step_id
                         WHERE t.step = $stepID AND t.$fileid = '$id';
                         ";
-              } else {
+            } else {
               $this->logError('Unsupported database type', null, ['dbType' => $dbType]);
               throw new JobRouterException("Unsupported database type: " . $dbType);
-              }
+            }
 
             $this->logDebug('Executing resubmission update query', ['id' => $id, 'query' => $query]);
 
@@ -220,18 +221,18 @@ trait FetchTrait
             $jobDB->exec($query);
 
             $this->logDebug('Resubmission updated for invoice', ['id' => $id]);
-            } catch (Exception $e) {
+          } catch (Exception $e) {
             $this->logWarning('Failed to update resubmission date for invoice', ['id' => $id, 'error' => $e->getMessage()]);
-            }
           }
         }
+      }
 
       $this->logInfo('fetchInvoices completed');
-      } catch (JobRouterException $e) {
+    } catch (JobRouterException $e) {
       throw $e;
-      } catch (Exception $e) {
+    } catch (Exception $e) {
       $this->logError('Unexpected error in fetchInvoices', $e);
       throw new JobRouterException('Fetch invoices error: ' . $e->getMessage());
-      }
     }
   }
+}
