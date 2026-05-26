@@ -196,7 +196,7 @@ trait DocumentClassifierTrait
 
       $dataItem = $data['data'][0];
       $status = $dataItem['status'] ?? '';
-      $confidence = $this->buildConfidenceField($dataItem);
+      
       $this->logInfo('Document classifier status received', ['status' => $status]);
 
       if (in_array($status, self::FALSE_STATES)) {
@@ -205,7 +205,7 @@ trait DocumentClassifierTrait
         }
 
       $this->storeOutputParameter('dc_documentId', $dataItem['documentId'] ?? '');
-      $this->storeOutputParameter('dc_tempJSON', json_encode($data));
+      $this->storeOutputParameter('dc_tempJSON', json_encode($data, JSON_PRETTY_PRINT));
 
       $attributes = $this->resolveOutputParameterListAttributes('classificationDetails');
       $values = [
@@ -215,8 +215,9 @@ trait DocumentClassifierTrait
         'vendorCompanyName' => $dataItem['vendorCompanyName'] ?? '',
         'recipientCompanyName' => $dataItem['recipientCompanyName'] ?? '',
         'issueDate' => !empty($dataItem['issueDate']) ? date('d.m.Y', strtotime($dataItem['issueDate'])) : '',
-        'documentClassifierConfidence' => $confidence ?? '',
+        
       ];
+      $this->buildConfidenceField($dataItem);
 
       $this->logDebug('Classification values', $values);
 
@@ -247,60 +248,57 @@ trait DocumentClassifierTrait
       }
     }
 
-  protected function buildConfidenceField(array $dataValues): string{
+  protected function buildConfidenceField(array $dataValues): void{
 
-      $dataConfidence = $dataValues['documentClassifierDataBoxes'];
-      $values = [
-        'dateConfidence' => [
-          'confidence' => $dataConfidence['documentClassifierDate']['confidence'] ?? '',
-          'reasoning' => $dataConfidence['documentClassifierDate']['reasoning'] ?? '',
-        ],
-        'numberConfidence' => [
-          'confidence' => $dataConfidence['documentClassifierNumber']['confidence'] ?? '',
-          'reasoning' => $dataConfidence['documentClassifierNumber']['reasoning'] ?? '',
-        ],
-        'typeConfidence' => [
-          'confidence' => $dataConfidence['documentClassifierType']['confidence'] ?? '',
-          'reasoning' => $dataConfidence['documentClassifierType']['reasoning'] ?? '',
-        ],
-        'recipientCompanyConfidence' => [
-          'confidence' => $dataConfidence['recipientCompanyName']['confidence'] ?? '',
-          'reasoning' => $dataConfidence['recipientCompanyName']['reasoning'] ?? '',
-        ],
-        'recipientInfoConfidence' => [
-          'confidence' => $dataConfidence['recipientInfo']['confidence'] ?? '',
-          'reasoning' => $dataConfidence['recipientInfo']['reasoning'] ?? '',
-        ],
-        'recipientVatNumberConfidence' => [
-          'confidence' => $dataConfidence['recipientVatNumber']['confidence'] ?? '',
-          'reasoning' => $dataConfidence['recipientVatNumber']['reasoning'] ?? '',
-        ],
-        'vatNumberConfidence' => [
-          'confidence' => $dataConfidence['vatNumber']['confidence'] ?? '',
-          'reasoning' => $dataConfidence['vatNumber']['reasoning'] ?? '',
-        ],
-        'vendorCompanyNameConfidence' => [
-          'confidence' => $dataConfidence['vendorCompanyName']['confidence'] ?? '',
-          'reasoning' => $dataConfidence['vendorCompanyName']['reasoning'] ?? '',
-        ],
-        'vendorInfoConfidence' => [
-          'confidence' => $dataConfidence['vendorInfo']['confidence'] ?? '',
-          'reasoning' => $dataConfidence['vendorInfo']['reasoning'] ?? '',
-        ],
-      ];
-      $string = [];
-      foreach($values as $name => $value ){
-        $string[] = $name . ': [reason: ' . $value['reasoning'] . ', confidence: ' . $value['confidence'] . ']';
+    $attributesConfidence = $this->resolveOutputParameterListAttributes("confidenceValues");
+
+    $dataConfidence = $dataValues['documentClassifierDataBoxes'];
+
+    $confidenceMapping = [
+        'dateConfidence'               => $dataConfidence['documentClassifierDate'] ?? [],
+        'numberConfidence'             => $dataConfidence['documentClassifierNumber'] ?? [],
+        'typeConfidence'               => $dataConfidence['documentClassifierType'] ?? [],
+        'recipientCompanyConfidence'   => $dataConfidence['recipientCompanyName'] ?? [],
+        'recipientInfoConfidence'      => $dataConfidence['recipientInfo'] ?? [],
+        'recipientVatNumberConfidence' => $dataConfidence['recipientVatNumber'] ?? [],
+        'vatNumberConfidence'          => $dataConfidence['vatNumber'] ?? [],
+        'vendorCompanyNameConfidence'  => $dataConfidence['vendorCompanyName'] ?? [],
+        'vendorInfoConfidence'         => $dataConfidence['vendorInfo'] ?? [],
+    ];
+    
+    $this->logDebug("confidenceMapping Fields", ['Confidence' => $confidenceMapping]);
+    $valuesTable = [];
+    $indexCount = 0;
+
+    foreach ($confidenceMapping as $name => $data) {
+      $this->logDebug("confidenceMapping Fields", [
+        'name' => $name, 
+        'confidence' => $data['confidence'] ?? 'unknown',
+        'reasoning' => $data['reasoning'] ?? 'unknown',
+        ]);
+        $valuesTable['confidenceName'][]       = $name;
+        $valuesTable['confidenceValue'][] = $data['confidence'] ?? null;
+        $valuesTable['confidenceReason'][]  = $data['reasoning'] ?? null;
+        $indexCount++;
+    }
+
+    $this->logDebug('Confidence details', ['rowCount' => $indexCount]);
+
+    for ($i = 0; $i < $indexCount; $i++) {
+      try {
+          $rowID = $this->getSubtableCount($attributesConfidence[0]['subtable']) + 1;
+          foreach ($attributesConfidence as $attribute) {
+              $value = isset($valuesTable[$attribute['id']][$i]) ? $valuesTable[$attribute['id']][$i] : '';
+              $this->setSubtableValue($attribute['subtable'], $rowID + $i, $attribute['value'], $value);
+            }
+      } catch (Exception $e) {
+          $this->logWarning('Failed to set confidence subtable value', [
+              'index' => $i, 
+              'error' => $e->getMessage()
+          ]);
       }
-
-      $this->logDebug('Confidence values fetched', [
-        'function' => 'buildConfidenceField',
-        'values' => $string,
-        ]
-      );
-      return implode( ', ', $string);
-  }  
-  
+    } 
+  }
 }
 
 

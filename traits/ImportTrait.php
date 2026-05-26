@@ -214,8 +214,14 @@ trait ImportTrait
     try {
       $this->logInfo("Starting $entityType import");
 
-      $table = $this->resolveInputParameter($tableParam);
-      $listfields = $this->resolveInputParameterListValues($listParam);
+      $table = $this->resolveInputParameter($tableParam) ?? [];
+      $listfields = $this->resolveInputParameterListValues($listParam) ?? [];
+
+      $this->logDebug("Resolving input Parameter", [
+        'table' => $table,
+        'listfields' => $listfields,
+      ]);
+      
 
       $list = array();
       foreach ($listfields as $listindex => $listvalue) {
@@ -229,8 +235,9 @@ trait ImportTrait
         }
 
       // Build SELECT query from field mapping
+      $this->logInfo("Connectiong to internal Database");
       $JobDB = $this->getJobDB();
-
+  
       $lastKey = null;
       foreach ($list as $listindex => $listvalue) {
         if (!empty($listvalue)) {
@@ -253,20 +260,18 @@ trait ImportTrait
 
       $result = $JobDB->query($temp);
       $payloads = [];
-
       while ($row = $JobDB->fetchRow($result)) {
         $data = [];
         foreach ($fields as $index => $field) {
           $value = isset($row[$fields[$index]]) ? $row[$fields[$index]] : '';
-
           if ($rowTransformers && isset($rowTransformers[$field])) {
             $data[$field] = $rowTransformers[$field]($value);
-            } else {
+          } else {
             $data[$field] = !empty($value) ? $value : '';
-            }
           }
-        $payloads[] = $data;
         }
+        $payloads[] = $data;
+      }
 
       $this->logInfo("$entityType CSV generated", ['rowCount' => count($payloads)]);
       $this->logDebug("$entityType payloads", ['payloads' => $payloads]);

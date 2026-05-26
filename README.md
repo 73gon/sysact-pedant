@@ -2,8 +2,6 @@
 
 Dies ist die Dokumentation der Systemaktivität: "Pedant"
 
-- _Version 2.3.0_
-
 Inhaltsverzeichnis
 
 - [Allgemein](#allgemein)
@@ -17,6 +15,8 @@ Inhaltsverzeichnis
   - [Dialogfelder von fetchData](#dialogfelder-von-fetchdata)
 - [Vorstellung von Funktion: documentClassifier](#vorstellung-von-funktion-documentclassifier)
   - [Dialogfelder von documentClassifier](#dialogfelder-von-documentclassifier)
+- [Vorstellung von Funktion: readDeliveryNote](#vorstellung-von-funktion-readdeliverynote)
+  - [Dialogfelder von readDeliveryNote](#dialogfelder-von-readdeliverynote)
 - [Vorstellung der Import-Funktionen: importVendorCSV / importRecipientCSV / importCostCenterCSV](#vorstellung-der-import-funktionen-importvendorcsv--importrecipientcsv--importcostcentercsv)
   - [Dialogfelder der Import-Funktionen](#dialogfelder-der-import-funktionen)
 - [Für Developer](#für-developer)
@@ -66,23 +66,23 @@ Die Funktion pedant ist das Herzstück der Systemaktivität für die Rechnungsve
 
 **Inputfelder**
 
-| Parameter      | Bedeutung                                                                                                                  | Hinweis                                                                            |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `INPUTFILE`    | Nimmt das zu verarbeitende Dokument aus dem JobRouter-Prozess entgegen.                                                    | Pflichtfeld                                                                        |
-| `API_KEY`      | Authentifizierungsschlüssel für die Pedant-API.                                                                            | Pflichtfeld                                                                        |
-| `DEMO`         | Schaltet zwischen Demo- und Produktivumgebung um.                                                                          | `1` = Demo                                                                         |
-| `INTNUMBER`    | Übergibt eine Mandanten- oder Empfängerreferenz an Pedant.                                                                 | Unterstützt die Zuordnung                                                          |
-| `MAXRETRIES`   | Legt die maximale Anzahl an Upload- oder Check-Versuchen fest.                                                             | Schutz vor Endlosschleifen                                                         |
-| `FLAG`         | Steuert den Verarbeitungsmodus.                                                                                            | Erlaubt: `normal`[^1], `check_extraction`[^2], `skip_review`[^3], `force_skip`[^4] |
-| `FLAGXML`      | Überschreibt `FLAG`, wenn eine XML-Datei verarbeitet wird.                                                                 | Nur für XML relevant                                                               |
-| `NEWVERSION`   | Setzt die Wiedervorlage auf ca. 2 Jahre.                                                                                   | Technische Sonderlogik                                                             |
-| `ZUGFERD`      | Aktiviert den ZUGFeRD-bezogenen Uploadpfad.                                                                                | Relevant für hybride E-Rechnungen                                                  |
-| `INTERVAL`     | Wiedervorlage in Minuten, wenn `NEWVERSION` nicht aktiv ist.                                                               | Polling-Abstand                                                                    |
-| `NOTE`         | Optionaler Kommentar, der mit dem Dokument an Pedant übertragen wird und bei der Überprüfung eines Mitarbeiters einsehbar. | Optional                                                                           |
-| `INCIDENT`     | Kennzeichnet den Vorgang für das Logging.                                                                                  | Erscheint in jeder Logzeile                                                        |
-| `MAXFILESIZE`  | Maximale Dateigröße in MB.                                                                                                 | Standardwert ohne Eingabe: 20 MB                                                   |
-| `VENDORTABLE`  | Optionale JobRouter-Tabelle für einen Vendor-Import während `checkFile()`.                                                 | Spezialfall                                                                        |
-| `IMPORTVENDOR` | Mapping-Liste für den optionalen Vendor-Import.                                                                            | Gehört zu `VENDORTABLE`                                                            |
+| Parameter      | Bedeutung                                                                                                                                               | Hinweis                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `INPUTFILE`    | Nimmt das zu verarbeitende Dokument aus dem JobRouter-Prozess entgegen.                                                                                 | Pflichtfeld                                                                        |
+| `API_KEY`      | Authentifizierungsschlüssel für die Pedant-API.                                                                                                         | Pflichtfeld                                                                        |
+| `DEMO`         | Schaltet zwischen Demo- und Produktivumgebung um.                                                                                                       | `1` = Demo                                                                         |
+| `INTNUMBER`    | Übergibt eine Mandanten- oder Empfängerreferenz an Pedant.                                                                                              | Unterstützt die Zuordnung                                                          |
+| `MAXRETRIES`   | Legt die maximale Anzahl an Upload- oder Check-Versuchen fest.                                                                                          | Schutz vor Endlosschleifen                                                         |
+| `FLAG`         | Steuert den Verarbeitungsmodus.                                                                                                                         | Erlaubt: `normal`[^1], `check_extraction`[^2], `skip_review`[^3], `force_skip`[^4] |
+| `FLAGXML`      | Überschreibt `FLAG`, wenn eine XML-Datei verarbeitet wird.                                                                                              | Nur für XML relevant                                                               |
+| `NEWVERSION`   | Setzt die Wiedervorlage auf ca. 2 Jahre.                                                                                                                | Technische Sonderlogik                                                             |
+| `ZUGFERD`      | Aktiviert den ZUGFeRD-bezogenen Uploadpfad.                                                                                                             | Relevant für hybride E-Rechnungen                                                  |
+| `INTERVAL`     | Wiedervorlage in Minuten, wenn `NEWVERSION` nicht aktiv ist.                                                                                            | Polling-Abstand                                                                    |
+| `NOTE`         | Optionaler Kommentar, der mit dem Dokument an Pedant übertragen wird und bei der Überprüfung eines Mitarbeiters einsehbar.                              | Optional                                                                           |
+| `INCIDENT`     | Kennzeichnet den Vorgang für das Logging.                                                                                                               | Erscheint in jeder Logzeile                                                        |
+| `MAXFILESIZE`  | Maximale Dateigröße in MB.                                                                                                                              | Standardwert ohne Eingabe: 20 MB                                                   |
+| `VENDORTABLE`  | Bevor die ImportXXX-Funktion separat implementiert wurde, wurde die Funktion über dieses Feld gesteuert. Als Backup, für alte Kundensysteme beibehalten | Spezialfall                                                                        |
+| `IMPORTVENDOR` |                                                                                                                                                         | Gehört zu `VENDORTABLE`                                                            |
 
 **Outputfelder**
 
@@ -145,11 +145,42 @@ Die Funktion documentClassifier dient der automatisierten Einordnung und Metadat
 
 **Outputfelder**
 
-| Parameter               | Bedeutung                                                           |
-| ----------------------- | ------------------------------------------------------------------- |
-| `DC_DOCUMENTID`         | Dokument-ID für spätere Statusabfragen.                             |
-| `DC_TEMPJSON`           | Vollständige Rohantwort der API als JSON.                           |
-| `CLASSIFICATIONDETAILS` | Strukturierte Klassifikation wie Dokumenttyp, Firmenname und Datum. |
+| Parameter               | Bedeutung                                                                           |
+| ----------------------- | ----------------------------------------------------------------------------------- |
+| `DC_DOCUMENTID`         | Dokument-ID für spätere Statusabfragen.                                             |
+| `DC_TEMPJSON`           | Vollständige Rohantwort der API als JSON.                                           |
+| `CLASSIFICATIONDETAILS` | Strukturierte Klassifikation wie Dokumenttyp, Firmenname und Datum.                 |
+| `CONFIDENCEVALUES`      | Sammlung der von der KI zurückgegebenen selbstsicherheit in der Auslese der Felder. |
+
+# Vorstellung von Funktion: readDeliveryNote
+
+Die Funktion readDeliveryNote dient der automatisierten Auslesung und Metadaten-Extraktion von Lieferscheinen.
+
+## Dialogfelder von readDeliveryNote
+
+**Inputfelder**
+
+| Parameter     | Bedeutung                                                                                                                  | Hinweis                                                                                |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `API_KEY`     | Authentifizierungsschlüssel für die Pedant-API.                                                                            | Pflichtfeld                                                                            |
+| `DEMO`        | Schaltet zwischen Demo- und Produktivumgebung um.                                                                          | Optional                                                                               |
+| `INPUTFILE`   | Zu klassifizierendes Dokument.                                                                                             | Pflichtfeld                                                                            |
+| `FLAG`        | Upload-Aktion für den Classifier.                                                                                          | Erlaubt: `normal`, `check_extraction`, `skip_review`, `force_skip`; Standard: `normal` |
+| `MAXRETRIES`  | Maximale Anzahl an Check-Versuchen.                                                                                        | Schutz vor Endlosschleifen                                                             |
+| `INTERVAL`    | Wiedervorlage in Minuten.                                                                                                  | Polling-Abstand                                                                        |
+| `MAXFILESIZE` | Maximale Dateigröße in MB.                                                                                                 | Standardwert ohne Eingabe: 20 MB                                                       |
+| `NOTE`        | Optionaler Kommentar, der mit dem Dokument an Pedant übertragen wird und bei der Überprüfung eines Mitarbeiters einsehbar. | Optional                                                                               |
+| `INCIDENT`    | Kennzeichnet den Vorgang für das Logging                                                                                   | Standardwert ohne Eingabe: 20 MB                                                       |
+
+**Outputfelder**
+
+| Parameter             | Bedeutung                                       |
+| --------------------- | ----------------------------------------------- |
+| `FILEID`              | Dokument-ID für spätere Statusabfragen.         |
+| `INVOICEID`           | Pedant-interne Rechnungs-ID.                    |
+| `TEMPJSON`            | Vollständige Rohantwort der API als JSON.       |
+| `COUNTERSUMMARY`      | Zusammenfassung der Upload- und Check-Versuche. |
+| `DELIVERYNOTEDETAILS` | Extrahierte Informationen aus dem Lieferschein  |
 
 # Vorstellung der Import-Funktionen: importVendorCSV / importRecipientCSV / importCostCenterCSV
 
@@ -159,12 +190,13 @@ Diese Funktionen dienen dem Abgleich von Stammdaten zwischen JobRouter und Pedan
 
 **Inputfelder**
 
-| Parameter                                               | Bedeutung                                                                    | Hinweis                                       |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------- |
-| `API_KEY`                                               | Authentifizierungsschlüssel für die Pedant-API.                              | Pflichtfeld                                   |
-| `DEMO`                                                  | Schaltet zwischen Demo- und Produktivumgebung um.                            | Optional                                      |
-| `VENDORTABLE` / `RECIPIENTTABLE` / `COSTCENTERTABLE`    | Name der JobRouter-Tabelle oder View, aus der die Stammdaten gelesen werden. | Je nach Funktion unterschiedlich              |
-| `IMPORTVENDOR` / `IMPORTRECIPIENT` / `IMPORTCOSTCENTER` | Mapping-Liste für die CSV-Erzeugung.                                         | Ordnet Datenbankspalten den Pedant-Feldern zu |
+| Parameter                                               | Bedeutung                                                                          | Hinweis                                                                                |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `API_KEY`                                               | Authentifizierungsschlüssel für die Pedant-API.                                    | Pflichtfeld                                                                            |
+| `DEMO`                                                  | Schaltet zwischen Demo- und Produktivumgebung um.                                  | Optional                                                                               |
+| `VENDORTABLE` / `RECIPIENTTABLE` / `COSTCENTERTABLE`    | Name der JobRouter-Tabelle oder View, aus der die Stammdaten gelesen werden.       | Je nach Funktion unterschiedlich                                                       |
+| `IMPORTVENDOR` / `IMPORTRECIPIENT` / `IMPORTCOSTCENTER` | Mapping-Liste für die CSV-Erzeugung.                                               | Ordnet Datenbankspalten den Pedant-Feldern zu                                          |
+
 
 **Outputfelder**
 

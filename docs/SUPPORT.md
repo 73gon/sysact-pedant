@@ -12,8 +12,6 @@ Inhaltsverzeichnis
 
 - Wenn `DEMO` aktiv ist, werden Rechnungs-, Fetch- und Classifier-Requests gegen `https://api.demo.pedant.ai` ausgeführt.
 
-- Wenn `DEMO` aktiv ist, laufen auch Entity-Importe gegen `https://api.demo.pedant.ai`.
-
 - In der Produktivumgebung laufen Rechnungs-, Fetch- und Classifier-Requests gegen `https://api.pedant.ai`.
 
 - Entity-Importe laufen in der Produktivumgebung gegen `https://entity.api.pedant.ai`.
@@ -23,7 +21,9 @@ Inhaltsverzeichnis
 
 Die folgenden Hinweise sind als praktische Erstmaßnahmen für den Support gedacht. Ziel ist nicht, jede Störung sofort zu eskalieren, sondern zunächst sauber zwischen Konfigurationsfehlern, transienten Plattformproblemen und echten Umgebungsproblemen zu unterscheiden.
 
-Zum Einrichten der Error-Logs siehe bitte in unserer [DEV.md](./DEV.md) unter dem punkt 'Vorstellung von Datei: config.php'
+Um Loginformationen zu erhalten, bearbeite die Datei `config.php` und setze den `log_level` auf den gewünschten Status. Die Logs werden unter `pedant/logs/log/` angelegt.
+
+Für genauere Informationen siehe bitte in unserer [DEV.md](./DEV.md) unter dem Punkt 'Vorstellung von Datei: config.php'
 
 ## HTTP-Codes im Support
 
