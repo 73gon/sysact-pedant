@@ -22,7 +22,7 @@ trait DeliveryTrait
       $this->logDebug('DeliveryNote params', ['maxFileSizeMB' => $this->maxFileSizeMB, 'interval' => $interval]);
 
       $dnUploadCounter = $this->getSystemActivityVar('DN_UPLOADCOUNTER');
-      if (!$dcUploadCounter) {
+      if (!$dnUploadCounter) {
         $this->setSystemActivityVar('DN_UPLOADCOUNTER', 0);
         $this->logDebug('DN_UPLOADCOUNTER initialized to 0');
         }
