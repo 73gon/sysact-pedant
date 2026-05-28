@@ -17,8 +17,9 @@ trait DeliveryTrait
     $this->logInfo('Starting DeliveryNote workflow');
     try {
       $this->maxFileSizeMB = $this->resolveInputParameter('maxFileSize') ?: self::DEFAULT_MAX_FILE_SIZE_MB;
-      $interval = $this->resolveInputParameter('interval');
-      $this->setResubmission($interval, 'm');
+      $isNew = $this->resolveInputParameter('new');
+      $intervalOld = $this->resolveInputParameter('interval');
+      $this->setResubmission($isNew ? 17520 : $intervalOld, $isNew ? 'h' : 'm');
       $this->logDebug('DeliveryNote params', ['maxFileSizeMB' => $this->maxFileSizeMB, 'interval' => $interval]);
 
       $dnUploadCounter = $this->getSystemActivityVar('DN_UPLOADCOUNTER');

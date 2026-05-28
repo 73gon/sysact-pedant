@@ -17,8 +17,9 @@ trait DocumentClassifierTrait
     $this->logInfo('Starting documentClassifier workflow');
     try {
       $this->maxFileSizeMB = $this->resolveInputParameter('maxFileSize') ?: self::DEFAULT_MAX_FILE_SIZE_MB;
-      $dcInterval = $this->resolveInputParameter('dc_interval');
-      $this->setResubmission($dcInterval, 'm');
+      $isNew = $this->resolveInputParameter('new');
+      $intervalOld = $this->resolveInputParameter('dc_interval');
+      $this->setResubmission($isNew ? 17520 : $intervalOld, $isNew ? 'h' : 'm');
       $this->logDebug('documentClassifier params', ['maxFileSizeMB' => $this->maxFileSizeMB, 'dc_interval' => $dcInterval]);
 
       $dcUploadCounter = $this->getSystemActivityVar('DC_UPLOADCOUNTER');
