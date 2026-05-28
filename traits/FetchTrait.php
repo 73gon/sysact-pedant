@@ -115,11 +115,26 @@ trait FetchTrait
         $statusQuery = '?' . implode('&', $queryParts);
       }
 
+      $exportPath = $this->resolveInputParameter('export_path');
+
       $baseURL = $this->getBaseUrl();
       $url_invoice = "$baseURL/v1/external/documents/invoices/to-export" . $statusQuery;
       $url_einvoice = "$baseURL/v1/external/documents/e-invoices/to-export" . $statusQuery;
+      $document_classifier = "$baseURL/v1/external/documents/document-classifiers/to-export" . $statusQuery;
+      $delivery_note = "$baseURL/v1/external/documents/delivery-notes/to-export" . $statusQuery;
 
-      foreach ([$url_invoice, $url_einvoice] as $baseUrl) {
+      $exportPaths = [];
+      if ($exportPath === 'invoices') {
+        $exportPaths[] = $url_invoice;
+        $exportPaths[] = $url_einvoice;
+      } elseif ($exportPath === 'document_classifier') {
+        $exportPaths[] = $document_classifier;
+      } elseif ($exportPath === 'delivery_note') {
+        $exportPaths[] = $delivery_note;
+      }
+
+
+      foreach ($exportPaths as $baseUrl) {
         $allIds = [];
         $pageCount = 1;
         $currentPage = 1;
@@ -218,9 +233,15 @@ trait FetchTrait
             $this->logDebug('Executing resubmission update query', ['id' => $id, 'query' => $query]);
 
             $jobDB = $this->getJobDB();
-            $jobDB->exec($query);
+            $affectedRows = $jobDB->exec($query);
 
-            $this->logDebug('Resubmission updated for invoice', ['id' => $id]);
+            if ($affectedRows === 0) {
+              $this->logWarning('Resubmission NOT updated - No matching rows found (possibly invalid stepID)', ['id' => $id, 'stepID' => $stepID]);
+              // CODE HIER EINFÜGEN
+            } else {
+              $this->logDebug('Resubmission updated for invoice', ['id' => $id]);
+            }
+
           } catch (Exception $e) {
             $this->logWarning('Failed to update resubmission date for invoice', ['id' => $id, 'error' => $e->getMessage()]);
           }
