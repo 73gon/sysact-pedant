@@ -158,4 +158,4 @@ define('DN_RECIPIENTCOMPANYNAME', 'Empfänger Firmenname');
 define('DN_VENDORCOMPANYNAME', 'Lieferant Firmenname');
 define('DN_VENDORINFO', 'Lieferant Informationen');
 define('DC_CONFIDENCES', 'Sicherheit');
-
+define('EXPORT_PATH', 'Exportpfad');

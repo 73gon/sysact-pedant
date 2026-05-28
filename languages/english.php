@@ -157,5 +157,6 @@ define('DN_ORDERNUMBER', 'Order number');
 define('DN_RECIPIENTCOMPANYNAME', 'Recipient company name');
 define('DN_VENDORCOMPANYNAME', 'Vendor company name');
 define('DN_VENDORINFO', 'Vendor information');
-define('DC_CONFIDENCES', 'Sicherheit');
+define('DC_CONFIDENCES', 'Confidences');
+define('EXPORT_PATH', 'Export Path');
 
